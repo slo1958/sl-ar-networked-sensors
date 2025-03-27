@@ -34,21 +34,32 @@ void pollTemperature() {
 
 
 void printStandAloneStatus() {
+  
   Serial.print("Found ");
   Serial.print(SensorCount, DEC);
   Serial.println(" sensor(s).");
-  Serial.print("Device ID ");
+  
+  Serial.print("Device address ");
   Serial.print(DeviceID);
   Serial.println(".");
-
+  
+  Serial.print("Version ");
+  Serial.print(SOFTWARE_VERSION);
+  Serial.println(".");
+    
   Serial.print("Parasite power is ");
   printBoolean(SensorParasitePower, "OFF", "ON");
-  Serial.println();
+  Serial.println(".");
 
+  Serial.print("Polling mode is ");
+  printBoolean(AutoPollingMode, "OFF", "ON");
+  Serial.println(".");
+    
   Serial.print("Sensor address ");
   printBoolean(SensorDeviceFound, "not found", "is ");
   if (SensorDeviceFound) {
      char xbuf[32]; 
+     clearBuffer(xbuf, 32);
      bytesToHexBuf(SensorAddress, 8, xbuf);
      Serial.print(xbuf);
   }

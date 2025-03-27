@@ -2,6 +2,7 @@
 #include <DallasTemperature.h>
 #include <EEPROM.h>
 
+#define SOFTWARE_VERSION "0.0.002"
 
 // Data wire is connected to GPIO 4
 #define ONE_WIRE_BUS_IO 4
@@ -23,7 +24,7 @@
 #define LED_DELAY_OFF 0
 
 #define INPUT_BUFFER_SIZE 16
-#define OUTPUT_BUFFER_SIZE 32
+#define OUTPUT_BUFFER_SIZE 64
 
 // Local mode is activated if DI5 (BUTTON_IO) is high during setup
 // Set Address command is enabled in normal mode if DI5 (BUTTON_IO) becomes high after setup, 

@@ -37,7 +37,9 @@
 // RA222:X777;
 //
 
+#define XBUF_SIZE 32
 
+char xbuf[XBUF_SIZE];
 
 int extractCheckedAddress(int startbyte) {
   int k1 = getBufferIntAt(startbyte, 3, false);
@@ -50,6 +52,33 @@ int extractCheckedAddress(int startbyte) {
   return k1;
 }
 
+void writeReply() {
+  startWriting();
+  
+  Serial.print(outputBuffer);
+
+  doneWriting();
+
+  clearInputBuffer();
+  clearOutputBuffer();
+}
+
+void addAddressToOutputBuffer(int addr) {
+
+  addToOutputBuffer('A');
+       
+  clearBuffer(xbuf, XBUF_SIZE);
+  unsignedIntToBuf(addr,3, xbuf);
+  moveToOutputBuffer(xbuf);
+
+  addToOutputBuffer(':');
+  addToOutputBuffer('X');
+      
+  clearBuffer(xbuf, XBUF_SIZE);
+  unsignedIntToBuf(999-addr,3, xbuf);
+  moveToOutputBuffer(xbuf);
+  return;
+}
 
 void processCommand() {
   //
@@ -59,12 +88,14 @@ void processCommand() {
   //
   
   char msgType = inputBuffer[0];
-  char cmd = inputBuffer[1];
+  char cmd = inputBuffer[1]; 
+  
   if (msgType != 'C') {
     clearInputBuffer();
     return;
   }
 
+  clearOutputBuffer();
   int addr = extractCheckedAddress(ADDRESS_START);
     
   if (cmd == 'A') {
@@ -75,26 +106,33 @@ void processCommand() {
     }
     // Set device address
     if ((1 <= addr) && (addr <= 250)) {
+      int old_addr = DeviceID;
       EEPROM.write(EEPROMAddress_DeviceID, addr);
       DeviceID = addr;
+      
+      addToOutputBuffer('R');
 
-      startWriting();
-      Serial.print('R');
-      Serial.print('A');
-      Serial.print(addr);
-      Serial.print(':');
-      Serial.print('X');
-      Serial.print(999 - addr);
-      Serial.print(';');
-      doneWriting();
+      addAddressToOutputBuffer(addr);
+
+      addToOutputBuffer(':');
+
+      addToOutputBuffer('O');
+       
+      clearBuffer(xbuf, XBUF_SIZE);
+      unsignedIntToBuf(old_addr,3, xbuf);
+      moveToOutputBuffer(xbuf);
+
+      addToOutputBuffer(';');   
+      
+      writeReply();
 
       clearInputBuffer();
       return;
     }
 
-    startWriting();
-    Serial.print("RE0:X99;");
-    doneWriting();
+    moveToOutputBuffer("RE0:X99;");
+    
+    writeReply();
 
     lastError = ERR_INVALID_ADDRESS;
     clearInputBuffer();
@@ -103,55 +141,100 @@ void processCommand() {
   } else if ((cmd == 'D') && (addr == DeviceID)){
     
       float t = getTemperature();
-      startWriting();
-      Serial.print('R');
-      Serial.print('A');
-      Serial.print(addr);
-      Serial.print(':');
-      Serial.print('X');
-      Serial.print(999 - addr);
-      Serial.print('T');
-      Serial.print(t);
-      Serial.print(':');
-      Serial.print('X');
-      Serial.print(999.999 - abs(t));
-      Serial.print(';');
-      doneWriting();
-    
-      clearInputBuffer();
+
+      addToOutputBuffer('R');
+
+      addAddressToOutputBuffer(addr);
+
+      addToOutputBuffer(':');
+      
+      addToOutputBuffer('T');
+      
+      clearBuffer(xbuf, XBUF_SIZE);
+      signedFloatToBuf(t, 8, 3, xbuf);
+      moveToOutputBuffer(xbuf);
+
+      addToOutputBuffer(':');
+
+      addToOutputBuffer('X');
+      
+      clearBuffer(xbuf, XBUF_SIZE);
+      signedFloatToBuf(999.999 - abs(t), 8, 3, xbuf);
+      moveToOutputBuffer(xbuf);
+
+      addToOutputBuffer(';');
+     
+      writeReply();
+
       lastError = 0;
       return;
 
+  } else if ((cmd == 'P')  && (addr == DeviceID)) {
+
+      addToOutputBuffer('R');
+
+      addAddressToOutputBuffer(addr);
+
+      addToOutputBuffer(';');
+      
+      writeReply();
+      
+      lastError = 0;
+      return;
+     
   } else if ((cmd == 'S')  && (addr == DeviceID)) {
- 
-      startWriting();
-      Serial.print('R');
-      Serial.print('A');
-      Serial.print(addr);
-      Serial.print(':');
-      Serial.print('X');
-      Serial.print(999 - addr);
-      Serial.print(':');
-      Serial.print('S');
+      addToOutputBuffer('R');
+
+      addAddressToOutputBuffer(addr);
+
+      addToOutputBuffer(':');
+
+      addToOutputBuffer('S');
+
       if (SensorDeviceFound) {
-        char xbuf[32]; 
+ 
+        clearBuffer(xbuf, XBUF_SIZE);
         bytesToHexBuf(SensorAddress, 8, xbuf);
-        Serial.print(xbuf);
+
+        moveToOutputBuffer(xbuf);
+        
+      } else {
+        
+        addToOutputBuffer('0');
+
       }
-      Serial.print(':');
-      Serial.print('P');
-      Serial.print(SensorParasitePower);
-      Serial.print(';');
-      doneWriting();
-   
-      clearInputBuffer();
+      
+      addToOutputBuffer(':');
+
+      addToOutputBuffer('P');
+      
+      clearBuffer(xbuf, XBUF_SIZE);
+      booleanToBuf(SensorParasitePower, xbuf);
+      
+      moveToOutputBuffer(xbuf);
+      
+      addToOutputBuffer(':');
+
+      addToOutputBuffer('V');
+      
+      moveToOutputBuffer(SOFTWARE_VERSION);
+ 
+      addToOutputBuffer(';');
+ 
+      writeReply();
+      
       return;
 
   } else if   (addr == DeviceID) {
-     Serial.print("RE1:X98;");
+     moveToOutputBuffer("RE1:X98;");
+     
+     writeReply();
+      
      lastError = ERR_INVALID_COMMAND;
      clearInputBuffer();
      return;
   }
 
 }
+//Sketch uses 11732 bytes (38%) of program storage space. Maximum is 30720 bytes.
+//Global variables use 647 bytes (31%) of dynamic memory, leaving 1401 bytes for local variables. Maximum is 2048 bytes.
