@@ -1,1 +1,1 @@
-Software for networked sensors, client and coordinator
+Software for networked sensors, worker and coordinator
