@@ -30,7 +30,7 @@ Set address of device to 123
 
 
 P : enable/disable repeat polling of temperature
-Format: Py; 
+Format: Py; <br>
 0 (off) or 1 (on)
 Example P0;
 Turn off repeat polling
