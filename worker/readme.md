@@ -18,27 +18,27 @@ Those commands are used:
 
 ### Stand alone command
 
- CxY
+ Cxy
 
-x = commands
+x = commands<br>
+y = parameter<br>
+A : update address<br>
+Format: CAyyy;<br>
+yyy is address between 001 .. 250<br>
+Example: CA123;<br>
+Set address of device to 123<br>
 
-A : update address
-Format: CAyyy;
-yyy is address between 001 .. 250
-Example: CA123;
-Set address of device to 123
 
+P : enable/disable repeat polling of temperature<br>
+Format: CPy; <br>
+y is 0 (off) or 1 (on)<br>
+Example CP0;<br>
+Turn off repeat polling<br>
 
-P : enable/disable repeat polling of temperature
-Format: Py; <br>
-0 (off) or 1 (on)
-Example P0;
-Turn off repeat polling
-
-S : show status
-Format: S;
-Example S;
-Request worker status
+S : show status<br>
+Format: CS;<br>
+Example CS;<br>
+Request worker status<br>
 
 
 ## Normal (networked) mode
