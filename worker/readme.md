@@ -1,6 +1,10 @@
-# Worker has two modes of operations
-= stand alone
-= normal (networked) mode
+# About Worker
+
+A worker has two modes of operations
+- stand alone
+- normal (networked) mode
+
+The mode of operation is decided by the state of BUTTON_IO during restart.
 
 ## Stand Alone mode
 The worker starts in stand alone if BUTTON_IO is HIGH during restart.
