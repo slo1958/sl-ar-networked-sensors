@@ -52,6 +52,7 @@ int extractCheckedAddress(int startbyte) {
   return k1;
 }
 
+
 void writeReply() {
   startWriting();
   
@@ -61,6 +62,33 @@ void writeReply() {
 
   clearInputBuffer();
   clearOutputBuffer();
+}
+
+
+void writeError(byte errCode) {
+      addToOutputBuffer('R');
+
+      addAddressToOutputBuffer(DeviceID);
+
+      addToOutputBuffer(':');
+
+      addToOutputBuffer('E');
+
+      clearBuffer(xbuf, XBUF_SIZE);
+      unsignedIntToBuf(errCode,2, xbuf);
+      moveToOutputBuffer(xbuf);
+      
+      addToOutputBuffer(':');
+
+      addToOutputBuffer('X');
+      
+      clearBuffer(xbuf, XBUF_SIZE);
+      unsignedIntToBuf(99-errCode,2, xbuf);
+      moveToOutputBuffer(xbuf);      
+      
+      addToOutputBuffer(';');
+
+      writeReply();
 }
 
 void addAddressToOutputBuffer(int addr) {
@@ -101,6 +129,7 @@ void processCommand() {
   if (cmd == 'A') {
     if (!digitalRead(BUTTON_IO)) {
       lastError = ERR_CANNOT_SET_ADDRESS;
+      if (addr == DeviceID) writeError(ERR_CANNOT_SET_ADDRESS);
       clearInputBuffer();
       return;
     }
@@ -126,18 +155,15 @@ void processCommand() {
       
       writeReply();
 
-      clearInputBuffer();
-      return;
+    } else {
+      lastError = ERR_INVALID_ADDRESS;    
     }
 
-    moveToOutputBuffer("RE0:X99;");
-    
-    writeReply();
-
-    lastError = ERR_INVALID_ADDRESS;
     clearInputBuffer();
     return;
-
+  } else if (cmd == 'F') {
+      ledChangeDelay = (  (addr == DeviceID) ? LED_DELAY_SIGNAL  : LED_DELAY_OFF) ;
+      
   } else if ((cmd == 'D') && (addr == DeviceID)){
     
       float t = getTemperature();
@@ -225,14 +251,14 @@ void processCommand() {
       
       return;
 
-  } else if   (addr == DeviceID) {
-     moveToOutputBuffer("RE1:X98;");
-     
-     writeReply();
+  } else if (addr == DeviceID) {
+
+      writeError(ERR_INVALID_COMMAND);
       
-     lastError = ERR_INVALID_COMMAND;
-     clearInputBuffer();
-     return;
+      lastError = ERR_INVALID_COMMAND;
+      
+      clearInputBuffer();
+      return;
   }
 
 }

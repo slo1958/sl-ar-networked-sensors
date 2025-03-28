@@ -18,8 +18,9 @@
 #define ERR_INVALID_ADDRESS 22
 #define ERR_INVALID_COMMAND 23
 
-#define LED_DELAY_LOCAL 2000
+#define LED_DELAY_STANDALONE 1500
 #define LED_DELAY_ERROR 200
+#define LED_DELAY_SIGNAL 100
 #define LED_DELAY_SETUP_ADDRESS 500
 #define LED_DELAY_OFF 0
 
@@ -87,9 +88,9 @@ void setup(void) {
 
   if (StandAloneMode) {
     printStandAloneStatus();
-    ledChangeDelay = 1000;
+    ledChangeDelay = LED_DELAY_STANDALONE;
   } else {
-    ledChangeDelay = 500;
+    ledChangeDelay = LED_DELAY_OFF;
   }
 
 }
@@ -157,8 +158,11 @@ void doneWriting() {
   digitalWrite(SERIAL_CTRL_IO, SERIAL_CTRL_READ);
 }
 
+int lastButtonState;
+
 void HandleNormalMode() {
-  ledChangeDelay = LED_DELAY_OFF;
+  // ledChangeDelay = LED_DELAY_OFF;
+  
   checkAnyMessage();
 
   if (inputBufferLocked) processCommand();
@@ -168,6 +172,10 @@ void HandleNormalMode() {
   if (digitalRead(BUTTON_IO))  {
     ledChangeDelay = LED_DELAY_SETUP_ADDRESS;
     lastError = 0;
+    lastButtonState = false;
+  } else if (lastButtonState) {
+    lastButtonState = false;
+    ledChangeDelay = LED_DELAY_OFF;
   }
 }
 
