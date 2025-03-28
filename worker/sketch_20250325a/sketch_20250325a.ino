@@ -2,7 +2,7 @@
 #include <DallasTemperature.h>
 #include <EEPROM.h>
 
-#define SOFTWARE_VERSION "0.0.002"
+#define SOFTWARE_VERSION "0.0.003"
 
 // Data wire is connected to GPIO 4
 #define ONE_WIRE_BUS_IO 4
@@ -24,12 +24,14 @@
 #define LED_DELAY_SETUP_ADDRESS 500
 #define LED_DELAY_OFF 0
 
-#define INPUT_BUFFER_SIZE 16
+#define INPUT_BUFFER_SIZE 32
 #define OUTPUT_BUFFER_SIZE 64
 
 // Local mode is activated if DI5 (BUTTON_IO) is high during setup
 // Set Address command is enabled in normal mode if DI5 (BUTTON_IO) becomes high after setup, 
 // this will also clear the latest error indication
+
+
 
 byte DeviceID = 255;
 
@@ -40,11 +42,10 @@ bool ledStatus = HIGH;
 unsigned long ledLastChange;
 unsigned long ledChangeDelay;
 unsigned long pollLastRun = 0;
-unsigned long lastBufferReset;
+ 
 
 
-int inputBufferIndex = 0;
-bool inputBufferLocked = false;
+
 byte lastError = 0;
 
 bool SensorParasitePower;
@@ -59,11 +60,10 @@ void setup(void) {
 
   ledLastChange = millis();
 
+  initSerialControl();
+  
   pinMode(BUTTON_IO, INPUT_PULLUP);
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(SERIAL_CTRL_IO, OUTPUT);
-
-  digitalWrite(SERIAL_CTRL_IO, SERIAL_CTRL_READ);
 
   StandAloneMode = digitalRead(BUTTON_IO);
 
@@ -84,7 +84,7 @@ void setup(void) {
   SensorParasitePower = sensors.isParasitePowerMode();
   SensorDeviceFound = sensors.getAddress(SensorAddress, 0);
 
-  inputBufferLocked = false;
+  clearInputBuffer();
 
   if (StandAloneMode) {
     printStandAloneStatus();
@@ -147,15 +147,7 @@ void HandleStandAlone() {
     }
   }
   checkAnyMessage();
-  if (inputBufferLocked) processStandAloneCommand();
-}
-
-void startWriting() {
-  digitalWrite(SERIAL_CTRL_IO, SERIAL_CTRL_WRITE);
-}
-
-void doneWriting() {
-  digitalWrite(SERIAL_CTRL_IO, SERIAL_CTRL_READ);
+  if (inputCommandReady())  processStandAloneCommand();
 }
 
 int lastButtonState;
@@ -165,14 +157,14 @@ void HandleNormalMode() {
   
   checkAnyMessage();
 
-  if (inputBufferLocked) processCommand();
+  if (inputCommandReady()) processCommand();
 
   if (lastError != 0) ledChangeDelay = LED_DELAY_ERROR;
 
   if (digitalRead(BUTTON_IO))  {
     ledChangeDelay = LED_DELAY_SETUP_ADDRESS;
     lastError = 0;
-    lastButtonState = false;
+    lastButtonState = true;
   } else if (lastButtonState) {
     lastButtonState = false;
     ledChangeDelay = LED_DELAY_OFF;
@@ -181,7 +173,7 @@ void HandleNormalMode() {
 
 void loop(void) {
 
-  if (millis() > lastBufferReset + AUTO_CLEAR_BUFFER_DELAY) clearInputBuffer();
+  if (inputBufferAge() > AUTO_CLEAR_BUFFER_DELAY) clearInputBuffer();
 
   if (StandAloneMode) {
     HandleStandAlone();
@@ -193,7 +185,7 @@ void loop(void) {
   if (ledChangeDelay > 0) {
     updateLED();
     delay(50);
-  } else if (inputBufferIndex > 0) {
+  } else if (anyDataInInputBuffer()) {
     updateLED();
     delay(50);
   } else {

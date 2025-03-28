@@ -1,11 +1,21 @@
 
 char inputBuffer[INPUT_BUFFER_SIZE];
+int inputBufferIndex;
+bool inputBufferLocked;
+
+unsigned long lastInputBufferReset;
+
+bool anyDataInInputBuffer() {return inputBufferIndex > 0; }
+
+bool inputCommandReady() {return inputBufferLocked; }
+
+long inputBufferAge() {return millis() - lastInputBufferReset;}
 
 void clearInputBuffer() {
   for (int i = 0; i < INPUT_BUFFER_SIZE; i++) inputBuffer[i] = 0;
   inputBufferLocked = false;
   inputBufferIndex = 0;
-  lastBufferReset = millis();
+  lastInputBufferReset = millis();
 }
 
 void checkAnyMessage() {
@@ -16,12 +26,31 @@ void checkAnyMessage() {
     if (!isControl(x)) {
       inputBuffer[inputBufferIndex] = x;
       inputBufferLocked = (x == ';');
-      if (inputBufferIndex < INPUT_BUFFER_SIZE) inputBufferIndex += 1;
-      lastBufferReset = millis();
-    }
+      
+      if (x == '*') {
+        clearInputBuffer();
+        inputBufferLocked = false;
+      } else if (inputBufferIndex < INPUT_BUFFER_SIZE) inputBufferIndex += 1;              
 
+     
+     lastInputBufferReset = millis();
+     }    
   }
 }
+//void checkAnyMessage() {
+//  if (inputBufferLocked) return;
+//
+//  while (Serial.available() > 0) {
+//    char x = Serial.read();
+//    if (!isControl(x)) {
+//      inputBuffer[inputBufferIndex] = x;
+//      inputBufferLocked = (x == ';');
+//      if (inputBufferIndex < INPUT_BUFFER_SIZE) inputBufferIndex += 1;
+//      lastInputBufferReset = millis();
+//    }
+//
+//  }
+//}
 
 
 int getBufferFlagAt(int offset) {
