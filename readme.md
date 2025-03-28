@@ -1,4 +1,4 @@
-Software for networked sensors, worker and coordinator
+Software for sensors networked over RS485, worker and coordinator
 
 The coordinator comes in two versions:
 - a test coordinator connected to networked workers via soft serial
