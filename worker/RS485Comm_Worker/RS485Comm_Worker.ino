@@ -2,7 +2,7 @@
 #include <DallasTemperature.h>
 #include <EEPROM.h>
 
-#define SOFTWARE_VERSION "0.0.003"
+#define SOFTWARE_VERSION "0.0.004"
 
 // Data wire is connected to GPIO 4
 #define ONE_WIRE_BUS_IO 4
