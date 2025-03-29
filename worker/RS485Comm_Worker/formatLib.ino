@@ -27,6 +27,13 @@ void unsignedIntToBuf(int value, int maxsize, char vbuffer[]){
    }
 }
 
+void unsignedLongIntToBuf(long value, int maxsize, char vbuffer[]){
+    dtostrf(abs(value), maxsize, 0, vbuffer);
+    for (int i = 0; vbuffer[i] != 0; i++) {
+    if (vbuffer[i] == ' ') vbuffer[i] = '0';
+   }
+}
+
 
 void unsignedFloatToBuf(float value, int maxsize, int nbrdec, char vbuffer[]){
   dtostrf(abs(value), maxsize, nbrdec, vbuffer);

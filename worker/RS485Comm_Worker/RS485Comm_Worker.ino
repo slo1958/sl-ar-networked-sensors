@@ -2,7 +2,7 @@
 #include <DallasTemperature.h>
 #include <EEPROM.h>
 
-#define SOFTWARE_VERSION "0.0.004"
+#define SOFTWARE_VERSION "0.0.005"
 
 // Data wire is connected to GPIO 4
 #define ONE_WIRE_BUS_IO 4
@@ -43,9 +43,6 @@ unsigned long ledLastChange;
 unsigned long ledChangeDelay;
 unsigned long pollLastRun = 0;
  
-
-
-
 byte lastError = 0;
 
 bool SensorParasitePower;

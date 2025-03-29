@@ -109,7 +109,9 @@ void addAddressToOutputBuffer(int addr) {
 }
 
 void writeStatusReply(int addr){
-   addToOutputBuffer('R');
+  unsigned long temp;
+  
+  addToOutputBuffer('R');
 
       addAddressToOutputBuffer(addr);
 
@@ -144,10 +146,44 @@ void writeStatusReply(int addr){
       addToOutputBuffer('V');
       
       moveToOutputBuffer(SOFTWARE_VERSION);
- 
+
+      addToOutputBuffer(':');
+
+      addToOutputBuffer('L');
+
+      clearBuffer(xbuf, XBUF_SIZE);
+      unsignedLongIntToBuf(ledChangeDelay,6, xbuf);
+      moveToOutputBuffer(xbuf);
+      
+      addToOutputBuffer(':');     
+
+      temp =  999999;
+
+      temp = temp - ledChangeDelay;
+      
+      Serial.println(temp);
+      
+      clearBuffer(xbuf, XBUF_SIZE);
+      unsignedLongIntToBuf(999999-ledChangeDelay,6, xbuf);
+      moveToOutputBuffer(xbuf);
+
       endOutputBuffer();
  
       writeReply();
+}
+
+void writeFlashReply(int addr) {
+      addToOutputBuffer('R');
+
+      addAddressToOutputBuffer(addr);
+
+      addToOutputBuffer(':');
+          
+      addToOutputBuffer('F');  
+      
+      endOutputBuffer();
+ 
+      writeReply();      
 }
 
 void writePollReply(int addr){
@@ -222,6 +258,7 @@ void processCommand() {
     
   } else if (cmd == 'F') {
       ledChangeDelay = (  (addr == DeviceID) ? LED_DELAY_SIGNAL  : LED_DELAY_OFF) ;
+      if (addr == DeviceID) writeFlashReply(addr);
       
   } else if ((cmd == 'D') && (addr == DeviceID)){
     
