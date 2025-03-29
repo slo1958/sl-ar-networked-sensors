@@ -15,16 +15,19 @@
 //
 // x = Commands
 // A: set device address (001 to 250), current address is not tested and BUTTON_IO must be set high after setup
-// S: get device status
 // D: get device data
+// F: Flash led (reset if address is not matching)
 // P: poll device
+// S: get device status
 //
 // Reply element
 // A<value> : address
-// X<value> : Complement from abs(previous value) (against 999 for address, 999.999 for temperature)
-// S<value> : Sensor address or id
+// L<value> : Led delay
 // P<value> : Sensor parasite power
+// S<value> : Sensor address or id
 // T<value> : temperature
+// V<value> : Software version
+// X<value> : Complement from abs(previous value) (against 999 for address, 999.999 for temperature)
 //
 // Example
 // CS111888; get status from device address 111
@@ -109,7 +112,6 @@ void addAddressToOutputBuffer(int addr) {
 }
 
 void writeStatusReply(int addr){
-  unsigned long temp;
   
   addToOutputBuffer('R');
 
@@ -156,12 +158,6 @@ void writeStatusReply(int addr){
       moveToOutputBuffer(xbuf);
       
       addToOutputBuffer(':');     
-
-      temp =  999999;
-
-      temp = temp - ledChangeDelay;
-      
-      Serial.println(temp);
       
       clearBuffer(xbuf, XBUF_SIZE);
       unsignedLongIntToBuf(999999-ledChangeDelay,6, xbuf);
