@@ -28,3 +28,9 @@ void addToOutputBuffer(char cc){
   outputBuffer[outIndex+1] = 0;
   outIndex = outIndex+1;
 }
+
+void endOutputBuffer(){
+  outputBuffer[outIndex] = ';';
+  outputBuffer[outIndex+1] = 0;
+  outIndex = outIndex+1; 
+}

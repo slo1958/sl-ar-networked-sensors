@@ -86,7 +86,7 @@ void writeError(byte errCode) {
       unsignedIntToBuf(99-errCode,2, xbuf);
       moveToOutputBuffer(xbuf);      
       
-      addToOutputBuffer(';');
+      endOutputBuffer();
 
       writeReply();
 }
@@ -108,108 +108,8 @@ void addAddressToOutputBuffer(int addr) {
   return;
 }
 
-void processCommand() {
-  //
-  // The input buffer is locked, we received a ';'
-  //
-  // First character is the command
-  //
-  
-  char msgType = inputBuffer[0];
-  char cmd = inputBuffer[1]; 
-  
-  if (msgType != 'C') {
-    clearInputBuffer();
-    return;
-  }
-
-  clearOutputBuffer();
-  int addr = extractCheckedAddress(ADDRESS_START);
-    
-  if (cmd == 'A') {
-    if (!digitalRead(BUTTON_IO)) {
-      lastError = ERR_CANNOT_SET_ADDRESS;
-      if (addr == DeviceID) writeError(ERR_CANNOT_SET_ADDRESS);
-      clearInputBuffer();
-      return;
-    }
-    // Set device address
-    if ((1 <= addr) && (addr <= 250)) {
-      int old_addr = DeviceID;
-      EEPROM.write(EEPROMAddress_DeviceID, addr);
-      DeviceID = addr;
-      
-      addToOutputBuffer('R');
-
-      addAddressToOutputBuffer(addr);
-
-      addToOutputBuffer(':');
-
-      addToOutputBuffer('O');
-       
-      clearBuffer(xbuf, XBUF_SIZE);
-      unsignedIntToBuf(old_addr,3, xbuf);
-      moveToOutputBuffer(xbuf);
-
-      addToOutputBuffer(';');   
-      
-      writeReply();
-
-    } else {
-      lastError = ERR_INVALID_ADDRESS;    
-    }
-
-    clearInputBuffer();
-    return;
-  } else if (cmd == 'F') {
-      ledChangeDelay = (  (addr == DeviceID) ? LED_DELAY_SIGNAL  : LED_DELAY_OFF) ;
-      
-  } else if ((cmd == 'D') && (addr == DeviceID)){
-    
-      float t = getTemperature();
-
-      addToOutputBuffer('R');
-
-      addAddressToOutputBuffer(addr);
-
-      addToOutputBuffer(':');
-      
-      addToOutputBuffer('T');
-      
-      clearBuffer(xbuf, XBUF_SIZE);
-      signedFloatToBuf(t, 8, 3, xbuf);
-      moveToOutputBuffer(xbuf);
-
-      addToOutputBuffer(':');
-
-      addToOutputBuffer('X');
-      
-      clearBuffer(xbuf, XBUF_SIZE);
-      signedFloatToBuf(999.999 - abs(t), 8, 3, xbuf);
-      moveToOutputBuffer(xbuf);
-
-      addToOutputBuffer(';');
-     
-      writeReply();
-
-      lastError = 0;
-      return;
-
-  } else if ((cmd == 'P')  && (addr == DeviceID)) {
-
-      addToOutputBuffer('R');
-
-      addAddressToOutputBuffer(addr);
-
-      addToOutputBuffer(';');
-      
-      writeReply();
-      
-      lastError = 0;
-      return;
-     
-  } else if ((cmd == 'S')  && (addr == DeviceID)) {
-      addToOutputBuffer('R');
+void writeStatusReply(int addr){
+   addToOutputBuffer('R');
 
       addAddressToOutputBuffer(addr);
 
@@ -245,10 +145,127 @@ void processCommand() {
       
       moveToOutputBuffer(SOFTWARE_VERSION);
  
-      addToOutputBuffer(';');
+      endOutputBuffer();
  
       writeReply();
+}
+
+void writePollReply(int addr){
+      addToOutputBuffer('R');
+
+      addAddressToOutputBuffer(addr);
+
+      endOutputBuffer();
       
+      writeReply();
+}
+
+
+void writeAddressUpdateReply(int old_addr, int addr){
+      addToOutputBuffer('R');
+
+      addAddressToOutputBuffer(addr);
+
+      addToOutputBuffer(':');
+
+      addToOutputBuffer('O');
+       
+      clearBuffer(xbuf, XBUF_SIZE);
+      unsignedIntToBuf(old_addr,3, xbuf);
+      moveToOutputBuffer(xbuf);
+
+      endOutputBuffer();   
+      
+      writeReply();
+}
+
+
+void processCommand() {
+  //
+  // The input buffer is locked, we received a ';'
+  //
+  // First character is the command
+  //
+  
+  char msgType = inputBuffer[0];
+  char cmd = inputBuffer[1]; 
+  
+  if (msgType != 'C') {
+    clearInputBuffer();
+    return;
+  }
+
+  clearOutputBuffer();
+  int addr = extractCheckedAddress(ADDRESS_START);
+    
+  if (cmd == 'A') {
+    if (!digitalRead(BUTTON_IO)) {
+      lastError = ERR_CANNOT_SET_ADDRESS;
+      if (addr == DeviceID) writeError(ERR_CANNOT_SET_ADDRESS);
+      clearInputBuffer();
+      return;
+    }
+    // Set device address
+    if ((1 <= addr) && (addr <= 250)) {
+      int old_addr = DeviceID;
+      EEPROM.write(EEPROMAddress_DeviceID, addr);
+      DeviceID = addr;
+
+      writeAddressUpdateReply(old_addr, addr);
+      
+    } else {
+      lastError = ERR_INVALID_ADDRESS;    
+    }
+
+    clearInputBuffer();
+    return;
+    
+  } else if (cmd == 'F') {
+      ledChangeDelay = (  (addr == DeviceID) ? LED_DELAY_SIGNAL  : LED_DELAY_OFF) ;
+      
+  } else if ((cmd == 'D') && (addr == DeviceID)){
+    
+      float t = getTemperature();
+
+      addToOutputBuffer('R');
+
+      addAddressToOutputBuffer(addr);
+
+      addToOutputBuffer(':');
+      
+      addToOutputBuffer('T');
+      
+      clearBuffer(xbuf, XBUF_SIZE);
+      signedFloatToBuf(t, 8, 3, xbuf);
+      moveToOutputBuffer(xbuf);
+
+      addToOutputBuffer(':');
+
+      addToOutputBuffer('X');
+      
+      clearBuffer(xbuf, XBUF_SIZE);
+      signedFloatToBuf(999.999 - abs(t), 8, 3, xbuf);
+      moveToOutputBuffer(xbuf);
+
+      endOutputBuffer();
+     
+      writeReply();
+
+      lastError = 0;
+      return;
+
+  } else if ((cmd == 'P')  && (addr == DeviceID)) {
+
+      writePollReply(addr);
+      clearInputBuffer();
+      lastError = 0;
+      return;
+     
+  } else if ((cmd == 'S')  && (addr == DeviceID)) {
+     
+      writeStatusReply(addr);
+      clearInputBuffer();
+      lastError = 0;
       return;
 
   } else if (addr == DeviceID) {
@@ -257,7 +274,7 @@ void processCommand() {
       
       lastError = ERR_INVALID_COMMAND;
       
-      clearInputBuffer();
+      clearInputBuffer();      
       return;
   }
 
