@@ -43,15 +43,15 @@ void printStandAloneStatus() {
   Serial.print(DeviceID);
   Serial.println(".");
   
-  Serial.print("Version ");
+  Serial.print("Version: ");
   Serial.print(SOFTWARE_VERSION);
   Serial.println(".");
     
-  Serial.print("Parasite power is ");
+  Serial.print("Parasite pwr: ");
   printBoolean(SensorParasitePower, "OFF", "ON");
   Serial.println(".");
 
-  Serial.print("Polling mode is ");
+  Serial.print("Polling: ");
   printBoolean(AutoPollingMode, "OFF", "ON");
   Serial.println(".");
     

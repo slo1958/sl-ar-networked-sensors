@@ -59,7 +59,7 @@ int extractCheckedAddress(int startbyte) {
 void writeReply() {
   startWriting();
   
-  Serial.print(outputBuffer);
+  // mySerial.print(outputBuffer);
 
   doneWriting();
 
@@ -227,6 +227,8 @@ void processCommand() {
     return;
   }
 
+  Serial.println(inputBuffer);
+  
   clearOutputBuffer();
   int addr = extractCheckedAddress(ADDRESS_START);
     

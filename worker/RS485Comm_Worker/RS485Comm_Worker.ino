@@ -1,15 +1,24 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <EEPROM.h>
+#include <SoftwareSerial.h>
 
-#define SOFTWARE_VERSION "0.0.005"
+#define SOFTWARE_VERSION "0.0.007"
 
 // Data wire is connected to GPIO 4
 #define ONE_WIRE_BUS_IO 4
+
 #define BUTTON_IO 5
+
 #define SERIAL_CTRL_IO 6
+
 #define EEPROMAddress_DeviceID 1
 #define AUTO_CLEAR_BUFFER_DELAY 10000
+
+
+#define SOFT_SERIAL_TX_IO 8
+#define SOFT_SERIAL_RX_IO 9
+
 
 #define SERIAL_CTRL_READ 0
 #define SERIAL_CTRL_WRITE 1
@@ -38,6 +47,7 @@ byte DeviceID = 255;
 OneWire oneWire(ONE_WIRE_BUS_IO);
 DallasTemperature sensors(&oneWire);
 DeviceAddress SensorAddress;
+
 bool ledStatus = HIGH;
 unsigned long ledLastChange;
 unsigned long ledChangeDelay;
@@ -52,6 +62,8 @@ bool StandAloneMode = false;
 int SensorCount = 0;
 
 
+//SoftwareSerial mySerial(SOFT_SERIAL_RX_IO, SOFT_SERIAL_TX_IO); // RX, TX
+
 
 void setup(void) {
 
@@ -64,15 +76,22 @@ void setup(void) {
 
   StandAloneMode = digitalRead(BUTTON_IO);
 
+  //mySerial.begin(9600);
+
+  DeviceID = EEPROM.read(EEPROMAddress_DeviceID);
+  
   if (StandAloneMode) {
     Serial.begin(9600);
     Serial.println("Starting stand alone mode.");
   } else {
     Serial.begin(9600);
+    Serial.print("Starting normal mode as ");
+    Serial.print(DeviceID);
+    Serial.println('.');
   }
 
 
-  DeviceID = EEPROM.read(EEPROMAddress_DeviceID);
+
 
   sensors.begin();
 
@@ -130,12 +149,9 @@ void updateLED() {
   if (timeSinceLastChange < 0 ) ledLastChange = millis();
 }
 
+
 #define ADDRESS_START 2
  
-
-
-
-
 void HandleStandAlone() {
   if (AutoPollingMode) {
     if ((millis() - pollLastRun ) > 1000) {
