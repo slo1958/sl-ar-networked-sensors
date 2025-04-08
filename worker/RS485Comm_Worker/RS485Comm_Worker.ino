@@ -2,8 +2,9 @@
 #include <DallasTemperature.h>
 #include <EEPROM.h>
 #include <SoftwareSerial.h>
+#include "InputBufferLib2.h"
 
-#define SOFTWARE_VERSION "0.0.007"
+#define SOFTWARE_VERSION "0.0.008"
 
 // Data wire is connected to GPIO 4
 #define ONE_WIRE_BUS_IO 4
@@ -41,7 +42,6 @@
 // this will also clear the latest error indication
 
 
-
 byte DeviceID = 255;
 
 OneWire oneWire(ONE_WIRE_BUS_IO);
@@ -58,40 +58,34 @@ byte lastError = 0;
 bool SensorParasitePower;
 bool SensorDeviceFound;
 bool AutoPollingMode = false;
-bool StandAloneMode = false;
+bool HasSerialMonitor = false;
 int SensorCount = 0;
 
+ 
 
-//SoftwareSerial mySerial(SOFT_SERIAL_RX_IO, SOFT_SERIAL_TX_IO); // RX, TX
+inputBufferHardSerial serialMonitor(1);
+inputBufferSoftSerial rsNetwork(SOFT_SERIAL_RX_IO, SOFT_SERIAL_TX_IO); // RX, TX
 
 
 void setup(void) {
 
   ledLastChange = millis();
 
-  initSerialControl();
+  //initSerialControl();
   
   pinMode(BUTTON_IO, INPUT_PULLUP);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  StandAloneMode = digitalRead(BUTTON_IO);
+  HasSerialMonitor = digitalRead(BUTTON_IO);
 
   //mySerial.begin(9600);
 
   DeviceID = EEPROM.read(EEPROMAddress_DeviceID);
   
-  if (StandAloneMode) {
+  if (HasSerialMonitor) {
     Serial.begin(9600);
-    Serial.println("Starting stand alone mode.");
-  } else {
-    Serial.begin(9600);
-    Serial.print("Starting normal mode as ");
-    Serial.print(DeviceID);
-    Serial.println('.');
+    Serial.println("Starting...");
   }
-
-
-
 
   sensors.begin();
 
@@ -100,13 +94,13 @@ void setup(void) {
   SensorParasitePower = sensors.isParasitePowerMode();
   SensorDeviceFound = sensors.getAddress(SensorAddress, 0);
 
-  clearInputBuffer();
+    rsNetwork.clearInputBuffer();
+    serialMonitor.clearInputBuffer();
 
-  if (StandAloneMode) {
+   
+
+  if (HasSerialMonitor) {
     printStandAloneStatus();
-    ledChangeDelay = LED_DELAY_STANDALONE;
-  } else {
-    ledChangeDelay = LED_DELAY_OFF;
   }
 
 }
@@ -152,15 +146,15 @@ void updateLED() {
 
 #define ADDRESS_START 2
  
-void HandleStandAlone() {
+void HandleSerialMonitor() {
   if (AutoPollingMode) {
     if ((millis() - pollLastRun ) > 1000) {
       pollTemperature();
       pollLastRun = millis();
     }
   }
-  checkAnyMessage();
-  if (inputCommandReady())  processStandAloneCommand();
+  serialMonitor.checkAnyMessage();
+  if (serialMonitor.inputCommandReady())  processStandAloneCommand();
 }
 
 int lastButtonState;
@@ -168,9 +162,9 @@ int lastButtonState;
 void HandleNormalMode() {
   // ledChangeDelay = LED_DELAY_OFF;
   
-  checkAnyMessage();
+  rsNetwork.checkAnyMessage();
 
-  if (inputCommandReady()) processCommand();
+  if (rsNetwork.inputCommandReady()) processCommand();
 
   if (lastError != 0) ledChangeDelay = LED_DELAY_ERROR;
 
@@ -185,15 +179,14 @@ void HandleNormalMode() {
 }
 
 void loop(void) {
+  serialMonitor.clearOldData(AUTO_CLEAR_BUFFER_DELAY);
+  rsNetwork.clearOldData(AUTO_CLEAR_BUFFER_DELAY);
+ 
 
-  if (inputBufferAge() > AUTO_CLEAR_BUFFER_DELAY) clearInputBuffer();
-
-  if (StandAloneMode) {
-    HandleStandAlone();
-  }
-  else {
+  if (HasSerialMonitor) HandleSerialMonitor();
+  
     HandleNormalMode();
-  }
+  
 
   if (ledChangeDelay > 0) {
     updateLED();

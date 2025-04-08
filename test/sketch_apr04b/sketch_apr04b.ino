@@ -10,6 +10,8 @@ SoftwareSerial* mySerial;
 void setup() {
   // put your setup code here, to run once:
   mySerial = &SoftwareSerial(1,2);
+ 
+ rsNetwork.clearInputBuffer();
 }
 
 void loop() {

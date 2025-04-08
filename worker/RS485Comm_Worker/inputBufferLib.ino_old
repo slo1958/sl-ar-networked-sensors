@@ -37,21 +37,6 @@ void checkAnyMessage() {
      }    
   }
 }
-//void checkAnyMessage() {
-//  if (inputBufferLocked) return;
-//
-//  while (Serial.available() > 0) {
-//    char x = Serial.read();
-//    if (!isControl(x)) {
-//      inputBuffer[inputBufferIndex] = x;
-//      inputBufferLocked = (x == ';');
-//      if (inputBufferIndex < INPUT_BUFFER_SIZE) inputBufferIndex += 1;
-//      lastInputBufferReset = millis();
-//    }
-//
-//  }
-//}
-
 
 int getBufferFlagAt(int offset) {
   char x;

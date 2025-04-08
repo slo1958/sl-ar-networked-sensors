@@ -16,9 +16,11 @@ class inputBufferHandler{
     long inputBufferAge();
     void clearInputBuffer();
     void checkAnyMessage();
-
+    void clearOldData(long maxAge);
+    char getCharAt(int charIndex);
     virtual bool byteAvailable();
     virtual char byteRead();
+    virtual void xbegin(int xferSpeed);
     
   private:
     char _inputBuffer[INPUT_BUFFER_SIZE];
@@ -28,10 +30,13 @@ class inputBufferHandler{
     
 };
 
-
 class inputBufferHardSerial:public inputBufferHandler {
+  public:
+    inputBufferHardSerial(int dummy);
+    
     bool byteAvailable() override;
     char byteRead() override;
+    void xbegin(int xferSpeed) override;
 };
 
 class inputBufferSoftSerial:public inputBufferHandler {
@@ -40,6 +45,7 @@ class inputBufferSoftSerial:public inputBufferHandler {
   
     bool byteAvailable() override;
     char byteRead() override;
+    void xbegin(int xferSpeed) override;
     
   private:
     SoftwareSerial * _mySerial;
