@@ -69,22 +69,22 @@ void printStandAloneStatus() {
 }
 
 
-void processStandAloneCommand() {
+void processStandAloneCommand(inputBufferHandler p) {
   //
   // The input buffer is locked, we received a ';'
   //
   // First character is the command
   //
-  char msgType = inputBuffer[0];
-  char cmd = inputBuffer[1];
+  char msgType = p.getCharAt(0);
+  char cmd =  p.getCharAt(1);
   if (msgType != 'C') {
-    clearInputBuffer();
+    p.clearInputBuffer();
     return;
   }
 
   if (cmd == 'A') {
     // Set device address
-    int addr = getBufferIntAt(ADDRESS_START, 3, false);
+    int addr = p.getBufferIntAt(ADDRESS_START, 3, false);
     if ((1 <= addr) && (addr <= 250)) {
       EEPROM.write(EEPROMAddress_DeviceID, addr);
       Serial.print("Device address updated from ");
@@ -93,28 +93,28 @@ void processStandAloneCommand() {
       Serial.print(addr);
       Serial.println('.');
       DeviceID = addr;
-      clearInputBuffer();
+      p.clearInputBuffer();
       return;
     } else {
       Serial.print("Invalid device address ");
       Serial.print(addr);
       Serial.println('.');
-      clearInputBuffer();
+      p.clearInputBuffer();
       return;
     }
   } else if (cmd == 'P') {
-    if (getBufferFlagAt(2) >= 0) AutoPollingMode = getBufferFlagAt(2);
-    clearInputBuffer();
+    if (p.getBufferFlagAt(2) >= 0) AutoPollingMode = p.getBufferFlagAt(2);
+    p.clearInputBuffer();
     Serial.print("Polling mode is now ");
     Serial.print(AutoPollingMode);
     Serial.println('.');
   } else if (cmd == 'S') {
-    clearInputBuffer();
+    p.clearInputBuffer();
     printStandAloneStatus();
   } else {
     Serial.print("Command error.");
     Serial.println();
-    clearInputBuffer();
+    p.clearInputBuffer();
     return;
   }
 

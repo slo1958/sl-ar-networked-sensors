@@ -25,6 +25,7 @@ class inputBufferHandler{
     
     virtual bool byteAvailable();
     virtual char byteRead();
+    virtual void xbegin(int xferSpeed);
     
   private:
     genericSerial * _mySerial2;
@@ -34,6 +35,26 @@ class inputBufferHandler{
     unsigned long _lastInputBufferReset;
     
 };
- 
+
+class inputBufferHardSerial:public inputBufferHandler {
+  public:
+    inputBufferHardSerial();
+    
+    bool byteAvailable() override;
+    char byteRead() override;
+    void xbegin(int xferSpeed) override;
+};
+
+class inputBufferSoftSerial:public inputBufferHandler {
+  public:
+    inputBufferSoftSerial(int rx_pin, int tx_pin);
+  
+    bool byteAvailable() override;
+    char byteRead() override;
+    void xbegin(int xferSpeed) override;
+    
+  private:
+    SoftwareSerial * _mySerial;
+};
 
 #endif

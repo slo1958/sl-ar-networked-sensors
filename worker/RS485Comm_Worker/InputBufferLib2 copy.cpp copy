@@ -89,14 +89,49 @@ int inputBufferHandler::extractCheckedAddress(int startbyte) {
 
 
 bool inputBufferHandler::byteAvailable(){
-  return _mySerial2->byteAvailable();
+  return false;
 }
 
 char inputBufferHandler::byteRead(){
-  return _mySerial2->byteRead();
+  return 0;
+}
+
+void inputBufferHandler::xbegin(int xferSpeed){
+  ;
 }
 
 
+inputBufferHardSerial::inputBufferHardSerial(){
+   clearInputBuffer();
+}
+
+bool inputBufferHardSerial::byteAvailable() {
+  return Serial.available();
+}
+
+char inputBufferHardSerial::byteRead() {
+  return Serial.read();
+}
+
+void inputBufferHardSerial::xbegin(int xferSpeed){
+  Serial.begin(xferSpeed);
+}
 
 
- 
+inputBufferSoftSerial::inputBufferSoftSerial(int rx_pin, int tx_pin) {
+  _mySerial = &SoftwareSerial(rx_pin, tx_pin, false); 
+  clearInputBuffer();
+}
+
+bool inputBufferSoftSerial::byteAvailable() {
+  return _mySerial->available();
+}
+
+char inputBufferSoftSerial::byteRead() {
+  return _mySerial->read();
+}
+
+
+void inputBufferSoftSerial::xbegin(int xferSpeed){
+   _mySerial->begin(xferSpeed);
+}

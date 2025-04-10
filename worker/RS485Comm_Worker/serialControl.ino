@@ -8,7 +8,7 @@
 //
 
 void initSerialControl(){
-    pinMode(SERIAL_CTRL_IO, OUTPUT);
+    pinMode(1, OUTPUT);
     digitalWrite(SERIAL_CTRL_IO, SERIAL_CTRL_READ);
 }
 
