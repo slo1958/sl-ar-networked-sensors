@@ -74,7 +74,7 @@ void setup(void) {
 
   ledLastChange = millis();
 
-  softSerial.setReadWriteControl(SERIAL_CTRL_IO, SERIAL_CTRL_READ, SERIAL_CTRL_WRITE);
+  rsNetworkSerial.setReadWriteControl(SERIAL_CTRL_IO, SERIAL_CTRL_READ, SERIAL_CTRL_WRITE);
   
   pinMode(BUTTON_IO, INPUT_PULLUP);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -86,7 +86,7 @@ void setup(void) {
   DeviceID = EEPROM.read(EEPROMAddress_DeviceID);
   
   if (hasUserControl) {
-    hardSerial.xbegin(9600);
+    userControlSerial.xbegin(9600);
     Serial.println("Starting...");
   }
 
@@ -97,8 +97,8 @@ void setup(void) {
   SensorParasitePower = sensors.isParasitePowerMode();
   SensorDeviceFound = sensors.getAddress(SensorAddress, 0);
 
-  rsNetwork.clearInputBuffer();
-  userControl.clearInputBuffer();
+  rsNetwork.clearBuffer();
+  userControl.clearBuffer();
 
    
 

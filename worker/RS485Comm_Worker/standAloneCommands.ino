@@ -78,7 +78,7 @@ void processStandAloneCommand(inputBufferHandler p) {
   char msgType = p.getCharAt(0);
   char cmd =  p.getCharAt(1);
   if (msgType != 'C') {
-    p.clearInputBuffer();
+    p.clearBuffer();
     return;
   }
 
@@ -93,28 +93,28 @@ void processStandAloneCommand(inputBufferHandler p) {
       Serial.print(addr);
       Serial.println('.');
       DeviceID = addr;
-      p.clearInputBuffer();
+      p.clearBuffer();
       return;
     } else {
       Serial.print("Invalid device address ");
       Serial.print(addr);
       Serial.println('.');
-      p.clearInputBuffer();
+      p.clearBuffer();
       return;
     }
   } else if (cmd == 'P') {
     if (p.getBufferFlagAt(2) >= 0) AutoPollingMode = p.getBufferFlagAt(2);
-    p.clearInputBuffer();
+    p.clearBuffer();
     Serial.print("Polling mode is now ");
     Serial.print(AutoPollingMode);
     Serial.println('.');
   } else if (cmd == 'S') {
-    p.clearInputBuffer();
+    p.clearBuffer();
     printStandAloneStatus();
   } else {
     Serial.print("Command error.");
     Serial.println();
-    p.clearInputBuffer();
+    p.clearBuffer();
     return;
   }
 

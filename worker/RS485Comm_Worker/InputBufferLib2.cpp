@@ -3,49 +3,42 @@
 
 inputBufferHandler::inputBufferHandler(genericSerial p){
   _mySerial2 = &p;
-  clearInputBuffer();
-}
-
-bool inputBufferHandler::anyDataInBuffer(){
-    return _inputBufferIndex > 0; 
+  clearBuffer();
 }
 
 bool inputBufferHandler::inputCommandReady(){
-  return _inputBufferLocked; 
+  return _BufferLocked; 
 }
 
 long inputBufferHandler::inputBufferAge(){
     return millis() - _lastInputBufferReset;
 }
 
-char inputBufferHandler::getCharAt(int charIndex){
-  return _inputBuffer[charIndex];
-}
+
     
-void inputBufferHandler::clearInputBuffer(){
-  for (int i = 0; i < INPUT_BUFFER_SIZE; i++) _inputBuffer[i] = 0;
-  _inputBufferLocked = false;
-  _inputBufferIndex = 0;
+void inputBufferHandler::clearBuffer(){
+  commonBufferHandler::clearBuffer();
+  _BufferLocked = false;
   _lastInputBufferReset = millis();
 }
 
 void inputBufferHandler::clearOldData(long maxAge){
-  if (inputBufferAge() > maxAge) clearInputBuffer();
+  if (inputBufferAge() > maxAge) clearBuffer();
 }
 
 void inputBufferHandler::checkAnyMessage() {
-    if (_inputBufferLocked) return;
+    if (_BufferLocked) return;
 
   while (byteAvailable() > 0) {
     char x = byteRead();
     if (!isControl(x)) {
-      _inputBuffer[_inputBufferIndex] = x;
-      _inputBufferLocked = (x == ';');
+      _Buffer[_BufferIndex] = x;
+      _BufferLocked = (x == ';');
       
       if (x == '*') {
-        clearInputBuffer();
-        _inputBufferLocked = false;
-      } else if (_inputBufferIndex < INPUT_BUFFER_SIZE) _inputBufferIndex += 1;              
+        clearBuffer();
+        _BufferLocked = false;
+      } else if (_BufferIndex < BUFFER_SIZE) _BufferIndex += 1;              
 
      
      _lastInputBufferReset = millis();
@@ -53,28 +46,7 @@ void inputBufferHandler::checkAnyMessage() {
   }
 }
 
-int inputBufferHandler::getBufferFlagAt(int offset) {
-  char x;
-  if (offset > INPUT_BUFFER_SIZE) return -1;
-  if (offset > _inputBufferIndex) return -1;
-  x = _inputBuffer[offset];
-  if (isdigit(x)) return x - '0';
-  return -1;
-}
 
-
-int inputBufferHandler::getBufferIntAt(int offset, int count, bool inverted) {
-  int k1 = 0;
-  for (int i = offset; i < offset + count; i++) {
-    if (i <= _inputBufferIndex) {
-      char x = _inputBuffer[i];
-      if (isDigit(x)) {
-        k1 = k1 * 10 + (inverted ? (9 - (x - '0')) :  (x - '0'));
-      } else return -1;
-    } else return -1;
-  }
-  return k1;
-}
 
 int inputBufferHandler::extractCheckedAddress(int startbyte) {
   int k1 = getBufferIntAt(startbyte, 3, false);

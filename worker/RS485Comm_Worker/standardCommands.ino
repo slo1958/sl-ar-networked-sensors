@@ -218,7 +218,7 @@ void processCommand(inputBufferHandler p) {
   char cmd = p.getCharAt(1); 
   
   if (msgType != 'C') {
-    p.clearInputBuffer();
+    p.clearBuffer();
     return;
   }
   
@@ -229,7 +229,7 @@ void processCommand(inputBufferHandler p) {
     if (!digitalRead(BUTTON_IO)) {
       lastError = ERR_CANNOT_SET_ADDRESS;
       if (addr == DeviceID) writeError(ERR_CANNOT_SET_ADDRESS); 
-      p.clearInputBuffer();
+      p.clearBuffer();
       return;
     }
     // Set device address
@@ -239,13 +239,13 @@ void processCommand(inputBufferHandler p) {
       DeviceID = addr;
 
       writeAddressUpdateReply(old_addr, addr);
-      p.clearInputBuffer();
+      p.clearBuffer();
       
     } else {
       lastError = ERR_INVALID_ADDRESS;    
     }
 
-    p.clearInputBuffer();
+    p.clearBuffer();
     return;
     
   } else if (cmd == 'F') {
@@ -279,21 +279,21 @@ void processCommand(inputBufferHandler p) {
       endOutputBuffer();
      
       writeReply();
-      p.clearInputBuffer();
+      p.clearBuffer();
       lastError = 0;
       return;
 
   } else if ((cmd == 'P')  && (addr == DeviceID)) {
 
       writePollReply(addr);
-      p.clearInputBuffer();
+      p.clearBuffer();
       lastError = 0;
       return;
      
   } else if ((cmd == 'S')  && (addr == DeviceID)) {
      
       writeStatusReply(addr);
-      p.clearInputBuffer();
+      p.clearBuffer();
       lastError = 0;
       return;
 
@@ -303,7 +303,7 @@ void processCommand(inputBufferHandler p) {
       
       lastError = ERR_INVALID_COMMAND;
       
-      p.clearInputBuffer();      
+      p.clearBuffer();      
       return;
   }
 

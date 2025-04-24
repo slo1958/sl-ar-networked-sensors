@@ -5,22 +5,18 @@
 #include "Arduino.h" 
 #include <SoftwareSerial.h>
 #include "SerialComm.h"
+#include "CommonBufferLib2.h"
 
-#define INPUT_BUFFER_SIZE 32
-
-class inputBufferHandler{
+class inputBufferHandler: public commonBufferHandler{
 
   public:
     inputBufferHandler(genericSerial p);
-    bool anyDataInBuffer();
     bool inputCommandReady();
     long inputBufferAge();
-    void clearInputBuffer();
+    void clearBuffer() override;
     void checkAnyMessage();
     void clearOldData(long maxAge);
-    char getCharAt(int charIndex);
-    int getBufferFlagAt(int offset);
-    int getBufferIntAt(int offset, int count, bool inverted);
+
     int extractCheckedAddress(int startbyte);
     
     virtual bool byteAvailable();
@@ -28,9 +24,7 @@ class inputBufferHandler{
     
   private:
     genericSerial * _mySerial2;
-    char _inputBuffer[INPUT_BUFFER_SIZE];
-    int _inputBufferIndex;
-    bool _inputBufferLocked;
+    bool _BufferLocked;
     unsigned long _lastInputBufferReset;
     
 };
