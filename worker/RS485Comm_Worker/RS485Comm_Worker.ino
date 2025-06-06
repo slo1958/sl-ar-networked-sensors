@@ -1,9 +1,11 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <EEPROM.h>
+
 #include <SoftwareSerial.h>
 #include "SerialComm.h"
 #include "InputBufferLib2.h"
+#include "OutputBufferLib2.h"
+#include "NodeDefinition.h"
 
 #define SOFTWARE_VERSION "0.0.008"
 
@@ -13,7 +15,7 @@
 #define BUTTON_IO 5
 
 
-#define EEPROMAddress_DeviceID 1
+
 #define AUTO_CLEAR_BUFFER_DELAY 10000
 
 
@@ -43,11 +45,14 @@
 // this will also clear the latest error indication
 
 
-byte DeviceID = 255;
-
 OneWire oneWire(ONE_WIRE_BUS_IO);
 DallasTemperature sensors(&oneWire);
 DeviceAddress SensorAddress;
+
+nodeDefinition CurrentNode;
+
+bool hasUserControl = false;
+
 
 bool ledStatus = HIGH;
 unsigned long ledLastChange;
@@ -59,20 +64,23 @@ byte lastError = 0;
 bool SensorParasitePower;
 bool SensorDeviceFound;
 bool AutoPollingMode = false;
-bool hasUserControl = false;
+
 int SensorCount = 0;
 
  
 hardwareSerial userControlSerial;
 softwareSerial rsNetworkSerial(SOFT_SERIAL_RX_IO, SOFT_SERIAL_TX_IO); // RX, TX
 
-inputBufferHandler userControl(userControlSerial);
-inputBufferHandler rsNetwork(rsNetworkSerial);
+inputBufferHandler userControlInput(userControlSerial);
+outputBufferHandler userControlOutput(userControlSerial);
 
+inputBufferHandler rsNetworkInput(rsNetworkSerial);
+outputBufferHandler rsNetworkOutput(rsNetworkSerial);
 
 void setup(void) {
-
+  
   ledLastChange = millis();
+  ledChangeDelay = LED_DELAY_OFF;
 
   rsNetworkSerial.setReadWriteControl(SERIAL_CTRL_IO, SERIAL_CTRL_READ, SERIAL_CTRL_WRITE);
   
@@ -83,11 +91,9 @@ void setup(void) {
 
   rsNetworkSerial.xbegin(9600);
 
-  DeviceID = EEPROM.read(EEPROMAddress_DeviceID);
   
   if (hasUserControl) {
     userControlSerial.xbegin(9600);
-    Serial.println("Starting...");
   }
 
   sensors.begin();
@@ -97,13 +103,14 @@ void setup(void) {
   SensorParasitePower = sensors.isParasitePowerMode();
   SensorDeviceFound = sensors.getAddress(SensorAddress, 0);
 
-  rsNetwork.clearBuffer();
-  userControl.clearBuffer();
-
+  rsNetworkInput.clearBuffer();
+  rsNetworkOutput.clearBuffer();
+  userControlInput.clearBuffer();
+  userControlOutput.clearBuffer();
    
 
   if (hasUserControl) {
-    printStandAloneStatus();
+    printStatus(userControlOutput);
   }
 
 }
@@ -147,30 +154,12 @@ void updateLED() {
 }
 
 
-#define ADDRESS_START 2
+// 
  
-void handleUserControl() {
-  if (AutoPollingMode) {
-    if ((millis() - pollLastRun ) > 1000) {
-      pollTemperature();
-      pollLastRun = millis();
-    }
-  }
-  userControl.checkAnyMessage();
-  if (userControl.inputCommandReady())  processStandAloneCommand(userControl);
-}
 
 int lastButtonState;
 
-void HandleNormalMode() {
-  // ledChangeDelay = LED_DELAY_OFF;
-  
-  rsNetwork.checkAnyMessage();
-
-  if (rsNetwork.inputCommandReady()) processCommand(rsNetwork);
-
-  if (lastError != 0) ledChangeDelay = LED_DELAY_ERROR;
-
+void checkButton() {
   if (digitalRead(BUTTON_IO))  {
     ledChangeDelay = LED_DELAY_SETUP_ADDRESS;
     lastError = 0;
@@ -179,27 +168,20 @@ void HandleNormalMode() {
     lastButtonState = false;
     ledChangeDelay = LED_DELAY_OFF;
   }
+  
 }
 
 void loop(void) {
-  userControl.clearOldData(AUTO_CLEAR_BUFFER_DELAY);
-  rsNetwork.clearOldData(AUTO_CLEAR_BUFFER_DELAY);
+  userControlInput.clearOldData(AUTO_CLEAR_BUFFER_DELAY);
+  rsNetworkInput.clearOldData(AUTO_CLEAR_BUFFER_DELAY);
  
+  processControl(userControlInput, userControlOutput);
 
-  if (hasUserControl) handleUserControl();
+  processCommand(CurrentNode, rsNetworkInput, rsNetworkOutput, hasUserControl);
+ 
+  if (lastError != 0) ledChangeDelay = LED_DELAY_ERROR;
   
-    HandleNormalMode();
+  updateLED();
   
-
-  if (ledChangeDelay > 0) {
-    updateLED();
-    delay(50);
-  } else if (rsNetwork.anyDataInBuffer()) {
-    updateLED();
-    delay(50);
-  } else {
-    updateLED();
-    delay(1000);
-  }
-
+  delay(100);
 }

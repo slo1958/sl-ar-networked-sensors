@@ -16,8 +16,7 @@ class inputBufferHandler: public commonBufferHandler{
     void clearBuffer() override;
     void checkAnyMessage();
     void clearOldData(long maxAge);
-
-    int extractCheckedAddress(int startbyte);
+ 
     
     virtual bool byteAvailable();
     virtual char byteRead();

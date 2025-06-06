@@ -14,9 +14,21 @@ void outputBufferHandler::clearBuffer() {
 void outputBufferHandler::addBoolean(bool value) {
   setBooleanAt(value, _BufferIndex);
   _BufferIndex += 1;
+  _Buffer[_BufferIndex] = 0; 
+
 }
 
-void outputBufferHandler::setBooleanAt(bool value, int index){
-   _Buffer[index] = (value ? '1' : '0');
-   _Buffer[index+1] = 0; 
+
+
+void outputBufferHandler::addChar(char cc){
+  _Buffer[_BufferIndex] = cc;
+  _BufferIndex += 1;
+  _Buffer[_BufferIndex] = 0;
+}
+
+
+void outputBufferHandler::endBuffer(){
+  _Buffer[_BufferIndex] = ';';
+  _BufferIndex += 1;
+  _Buffer[_BufferIndex] = 0;
 }

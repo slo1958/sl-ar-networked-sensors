@@ -47,19 +47,6 @@ void inputBufferHandler::checkAnyMessage() {
 }
 
 
-
-int inputBufferHandler::extractCheckedAddress(int startbyte) {
-  int k1 = getBufferIntAt(startbyte, 3, false);
-  if (k1 < 0) return -1;
-
-  int k2 = getBufferIntAt(startbyte + 3, 3, true);
-  if (k2 < 0) return -1;
-
-  if (k1 != k2) return -1;
-  return k1;
-}
-
-
 bool inputBufferHandler::byteAvailable(){
   return _mySerial2->byteAvailable();
 }

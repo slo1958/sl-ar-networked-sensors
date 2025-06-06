@@ -14,7 +14,12 @@ class outputBufferHandler: public commonBufferHandler{
     void clearBuffer() override;
     void addBoolean(bool value);
     void setBooleanAt(bool value, int index);
+ 
 
+    void addChar(char cc);
+    
+    void endBuffer();
+    
   private:
     genericSerial * _mySerial2;
 };

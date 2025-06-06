@@ -207,7 +207,7 @@ void writeAddressUpdateReply(int old_addr, int addr){
 }
 
 
-void processCommand(inputBufferHandler p) {
+void processCommand(inputBufferHandler p, outputBufferHandler q) {
   //
   // The input buffer is locked, we received a ';'
   //

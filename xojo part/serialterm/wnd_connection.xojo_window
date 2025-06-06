@@ -24,7 +24,7 @@ Begin DesktopWindow wnd_connection
    Title           =   "Serial comm"
    Type            =   0
    Visible         =   True
-   Width           =   800
+   Width           =   1024
    Begin DesktopLabel Label1
       AllowAutoDeactivate=   True
       Bold            =   False
@@ -70,7 +70,7 @@ Begin DesktopWindow wnd_connection
       Height          =   20
       Index           =   -2147483648
       Italic          =   False
-      Left            =   555
+      Left            =   896
       LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   False
@@ -101,7 +101,7 @@ Begin DesktopWindow wnd_connection
       Height          =   20
       Index           =   -2147483648
       Italic          =   False
-      Left            =   680
+      Left            =   696
       LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   False
@@ -158,13 +158,13 @@ Begin DesktopWindow wnd_connection
       TextAlignment   =   0
       TextColor       =   &c000000
       Tooltip         =   ""
-      Top             =   293
+      Top             =   52
       Transparent     =   False
       Underline       =   False
       UnicodeMode     =   1
       ValidationMask  =   ""
       Visible         =   True
-      Width           =   358
+      Width           =   295
    End
    Begin DesktopTextArea ta_input
       AllowAutoDeactivate=   True
@@ -205,13 +205,13 @@ Begin DesktopWindow wnd_connection
       TextAlignment   =   0
       TextColor       =   &c000000
       Tooltip         =   ""
-      Top             =   180
+      Top             =   471
       Transparent     =   False
       Underline       =   False
       UnicodeMode     =   1
       ValidationMask  =   ""
       Visible         =   True
-      Width           =   760
+      Width           =   500
    End
    Begin DesktopButton btn_send
       AllowAutoDeactivate=   True
@@ -226,7 +226,7 @@ Begin DesktopWindow wnd_connection
       Height          =   20
       Index           =   -2147483648
       Italic          =   False
-      Left            =   700
+      Left            =   440
       LockBottom      =   False
       LockedInPosition=   False
       LockLeft        =   False
@@ -238,7 +238,7 @@ Begin DesktopWindow wnd_connection
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   250
+      Top             =   541
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -269,7 +269,7 @@ Begin DesktopWindow wnd_connection
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   250
+      Top             =   541
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -300,7 +300,7 @@ Begin DesktopWindow wnd_connection
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   560
+      Top             =   298
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -338,38 +338,6 @@ Begin DesktopWindow wnd_connection
       Visible         =   True
       Width           =   21
    End
-   Begin DesktopLabel lb_name
-      AllowAutoDeactivate=   True
-      Bold            =   False
-      Enabled         =   True
-      FontName        =   "System"
-      FontSize        =   0.0
-      FontUnit        =   0
-      Height          =   20
-      Index           =   -2147483648
-      Italic          =   False
-      Left            =   178
-      LockBottom      =   False
-      LockedInPosition=   False
-      LockLeft        =   True
-      LockRight       =   False
-      LockTop         =   True
-      Multiline       =   False
-      Scope           =   0
-      Selectable      =   False
-      TabIndex        =   11
-      TabPanelIndex   =   0
-      TabStop         =   True
-      Text            =   "Untitled"
-      TextAlignment   =   0
-      TextColor       =   &c000000
-      Tooltip         =   ""
-      Top             =   20
-      Transparent     =   False
-      Underline       =   False
-      Visible         =   True
-      Width           =   395
-   End
    Begin DesktopPopupMenu pm_displayMode
       AllowAutoDeactivate=   True
       Bold            =   False
@@ -381,7 +349,7 @@ Begin DesktopWindow wnd_connection
       Index           =   -2147483648
       InitialValue    =   ""
       Italic          =   False
-      Left            =   145
+      Left            =   524
       LockBottom      =   False
       LockedInPosition=   False
       LockLeft        =   True
@@ -393,7 +361,7 @@ Begin DesktopWindow wnd_connection
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   250
+      Top             =   298
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -410,7 +378,7 @@ Begin DesktopWindow wnd_connection
       Index           =   -2147483648
       InitialValue    =   ""
       Italic          =   False
-      Left            =   337
+      Left            =   524
       LockBottom      =   False
       LockedInPosition=   False
       LockLeft        =   True
@@ -422,7 +390,7 @@ Begin DesktopWindow wnd_connection
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   250
+      Top             =   343
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -468,11 +436,11 @@ Begin DesktopWindow wnd_connection
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   52
+      Top             =   343
       Transparent     =   False
       Underline       =   False
       Visible         =   True
-      Width           =   760
+      Width           =   500
       _ScrollOffset   =   0
       _ScrollWidth    =   -1
    End
@@ -489,7 +457,7 @@ Begin DesktopWindow wnd_connection
       Height          =   20
       Index           =   -2147483648
       Italic          =   False
-      Left            =   526
+      Left            =   555
       LockBottom      =   False
       LockedInPosition=   False
       LockLeft        =   True
@@ -501,7 +469,7 @@ Begin DesktopWindow wnd_connection
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   250
+      Top             =   385
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -520,7 +488,7 @@ Begin DesktopWindow wnd_connection
       Height          =   234
       Index           =   -2147483648
       InitialParent   =   ""
-      Left            =   400
+      Left            =   345
       LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   False
@@ -531,10 +499,57 @@ Begin DesktopWindow wnd_connection
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   293
+      Top             =   52
       Transparent     =   False
       Visible         =   True
-      Width           =   380
+      Width           =   258
+   End
+   Begin DesktopListBox lbx_params
+      AllowAutoDeactivate=   True
+      AllowAutoHideScrollbars=   True
+      AllowExpandableRows=   False
+      AllowFocusRing  =   True
+      AllowResizableColumns=   False
+      AllowRowDragging=   False
+      AllowRowReordering=   False
+      Bold            =   False
+      ColumnCount     =   1
+      ColumnWidths    =   ""
+      DefaultRowHeight=   32
+      DropIndicatorVisible=   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      GridLineStyle   =   0
+      HasBorder       =   True
+      HasHeader       =   True
+      HasHorizontalScrollbar=   False
+      HasVerticalScrollbar=   True
+      HeadingIndex    =   -1
+      Height          =   509
+      Index           =   -2147483648
+      InitialValue    =   ""
+      Italic          =   False
+      Left            =   696
+      LockBottom      =   True
+      LockedInPosition=   False
+      LockLeft        =   False
+      LockRight       =   True
+      LockTop         =   True
+      RequiresSelection=   False
+      RowSelectionType=   0
+      Scope           =   0
+      TabIndex        =   18
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   20
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   300
+      _ScrollWidth    =   -1
    End
 End
 #tag EndDesktopWindow
@@ -567,6 +582,14 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub DefineParam(GroupName as string, paramName as string, AvailabilityMode as integer)
+		  
+		  lbx_params.AddRow(paramName)
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub OpenConnection()
 		  
 		  if CurrentSerialConnection  = nil then Return
@@ -587,9 +610,23 @@ End
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub SetName(newName as string)
+		  
+		  lbx_params.RemoveAllRows
+		  lbx_params.ColumnCount = 2
+		  lbx_params.HeaderAt(0) = newName
+		  
+		  DefineParam("","Status",0)
+		  
+		  Return
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Setup(myConnection as SerialComm)
 		  
-		  lb_name.text  = myConnection.DeviceName
+		  self.SetName( myConnection.DeviceName)
 		  
 		  self.CurrentSerialConnection = myConnection
 		  
@@ -791,6 +828,13 @@ End
 		  
 		  
 		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events lbx_params
+	#tag Event
+		Function PaintHeaderContent(g As Graphics, column As Integer) As Boolean
+		  
+		End Function
 	#tag EndEvent
 #tag EndEvents
 #tag ViewBehavior

@@ -84,7 +84,7 @@ void processStandAloneCommand(inputBufferHandler p) {
 
   if (cmd == 'A') {
     // Set device address
-    int addr = p.getBufferIntAt(ADDRESS_START, 3, false);
+    int addr = p.getUnsignedIntAt(ADDRESS_START, 3, false);
     if ((1 <= addr) && (addr <= 250)) {
       EEPROM.write(EEPROMAddress_DeviceID, addr);
       Serial.print("Device address updated from ");
@@ -103,7 +103,7 @@ void processStandAloneCommand(inputBufferHandler p) {
       return;
     }
   } else if (cmd == 'P') {
-    if (p.getBufferFlagAt(2) >= 0) AutoPollingMode = p.getBufferFlagAt(2);
+    if (p.getDigitAt(2) >= 0) AutoPollingMode = p.getDigitAt(2);
     p.clearBuffer();
     Serial.print("Polling mode is now ");
     Serial.print(AutoPollingMode);
