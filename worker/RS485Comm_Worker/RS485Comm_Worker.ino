@@ -5,7 +5,7 @@
 #include "SerialComm.h"
 #include "InputBufferLib2.h"
 #include "OutputBufferLib2.h"
-#include "NodeDefinition.h"
+#include "DeviceAndNode.h"
 
 #define SOFTWARE_VERSION "0.0.008"
 

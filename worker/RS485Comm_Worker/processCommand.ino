@@ -1,4 +1,4 @@
-#include "NodeDefinition.h"
+#include "DeviceAndNode.h"
 #include "InputBufferLib2.h"
 #include "OutputBufferLib2.h"
 
@@ -27,8 +27,8 @@
 void prepareReplyHeader(nodeDefinition node, outputBufferHandler outbuf){
   outbuf.clearBuffer();
   outbuf.setCharAt(0, 'R');
-  outbuf.setHexByteAt(1, node.nodeAddr());
-  outbuf.setHexByteAt(3, 255 - node.nodeAddr());
+  outbuf.setHexByteAt(1, node.getNodeAddr());
+  outbuf.setHexByteAt(3, 255 - node.getNodeAddr());
   outbuf.setCharAt(5,':');
   
 }
@@ -117,7 +117,7 @@ void processCommand(nodeDefinition node, inputBufferHandler inbuf, outputBufferH
   char cmd = inbuf.getCharAt(CMD_START); 
 
   if ((msgType == TYPE_SETADDRESS) && (allowSetAddres)) {
-    int oldAddress = node.nodeAddr();
+    int oldAddress = node.getNodeAddr();
     if (setAddress(node, inbuf) ) {
       prepareReplyUpdateAddress(node, outbuf, oldAddress, CMD_OK);
     } else {
@@ -136,7 +136,7 @@ void processCommand(nodeDefinition node, inputBufferHandler inbuf, outputBufferH
 
   int targetAddress = extractCheckedAddress(inbuf);
   if (targetAddress < 0) {inbuf.clearBuffer(); return; }
-  if (targetAddress != node.nodeAddr()) {inbuf.clearBuffer(); return; }
+  if (targetAddress != node.getNodeAddr()) {inbuf.clearBuffer(); return; }
   
   if (cmd == CMD_RESTART_NODE) restartNode();
 
