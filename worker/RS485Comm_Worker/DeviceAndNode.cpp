@@ -96,24 +96,41 @@ void deviceDefinition::getRegisterDescription(int registerNumber, char v[], int 
     descriptionSetRegsiterNumber( registerNumber,  v);
     descriptionSetUoM("-",  v);
     descriptionSetRWMode(REGISTER_DATA_TYPE_RO_STR,  v);
-    descriptionSetLabel("DEVICE",  v);
+    descriptionSetLabel("NAME",  v);
     return;
   }
 
-  if (registerNumber == REGISTER_DEVICE_REGISTER_COUNT) {
+  if (registerNumber == REGISTER_MODEL_ID) {
+    descriptionSetRegsiterNumber( registerNumber,  v);
+    descriptionSetUoM("-",  v);
+    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_STR,  v);
+    descriptionSetLabel("MODEL-ID",  v);
+    return;
+  }
+
+
+  if (registerNumber == REGISTER_DEVICE_BRAND) {
+    descriptionSetRegsiterNumber( registerNumber,  v);
+    descriptionSetUoM("-",  v);
+    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_STR,  v);
+    descriptionSetLabel("BRAND",  v);
+    return;
+  }
+  
+  if (registerNumber == REGISTER_DEVICE_REGISTER_LAST_ID) {
     descriptionSetRegsiterNumber( registerNumber,  v);
     descriptionSetUoM("-",  v);
     descriptionSetRWMode(REGISTER_DATA_TYPE_RO_HEXINT2CHAR,  v);
-    descriptionSetLabel("REG.COUNT",  v);
+    descriptionSetLabel("LAST-REG-ID",  v);
     return;
   }
 
-  if (registerNumber == REGISTER_DEVICE_NAME) {
-    
-  }
-    
-  moveToBuffer("Undefined", v,  bufferLength);
-
+  descriptionSetRegsiterNumber( registerNumber,  v);
+  descriptionSetUoM("-",  v);
+  descriptionSetRWMode(REGISTER_DATA_TYPE_ERROR,  v);
+  descriptionSetLabel("NOT-FOUND",  v);
+  return;
+  
 }
 
 
@@ -145,15 +162,15 @@ void deviceDefinition::getName(char v[], int bufferLength){
 }
 
 
-int deviceDefinition::getRegisterCount(){
-  return getRegisterIntegerValue(REGISTER_DEVICE_REGISTER_COUNT);
+int deviceDefinition::getRegisterLastID(){
+  return getRegisterIntegerValue(REGISTER_DEVICE_REGISTER_LAST_ID);
 }
 
 
 #define DESC_OFFSET_REG_NUMBER 0
 #define DESC_OFFSET_UOM 1
-#define DESC_OFFSET_RW_MODE 4
-#define DESC_OFFSET_LABEL 5
+#define DESC_OFFSET_RW_MODE 5
+#define DESC_OFFSET_LABEL 6
 #define DESC_OFFSET_MAX 15
 
 void deviceDefinition::descriptionSetRegsiterNumber(int registerNumber, char v[]){
@@ -165,6 +182,7 @@ void deviceDefinition::descriptionSetUoM(char UoM[], char v[]){
   v[DESC_OFFSET_UOM+1] = UoM[1];
   if (UoM[1] == 0) return;
   v[DESC_OFFSET_UOM+2] = UoM[2];
+  v[DESC_OFFSET_UOM+3] = 0;
   return;
 }
 
@@ -182,7 +200,7 @@ void deviceDefinition::descriptionSetLabel(char label[], char v[]){
 // Node information device (device 00 )
 //
 nodeInfoDeviceDefinition::nodeInfoDeviceDefinition(){
-  
+  _lastError = 0;
 }
     
 void nodeInfoDeviceDefinition::configureDevice(){
@@ -193,21 +211,45 @@ void nodeInfoDeviceDefinition::setLastDeviceID(int lastDeviceID){
   _lastDeviceID = lastDeviceID;
 }
 
+void nodeInfoDeviceDefinition::setLastError(int lastError){
+  _lastError = lastError;
+}
+    
 int nodeInfoDeviceDefinition::getRegisterIntegerValue(int registerNumber) {
-  if (registerNumber == REGISTER_DEVICE_REGISTER_COUNT) return 5;
-  if (registerNumber == 3) return _lastDeviceID;
+  if (registerNumber == REGISTER_DEVICE_REGISTER_LAST_ID) return 5;
+  if (registerNumber == REGISTER_NODE_INFO_LAST_DEV_ID) return _lastDeviceID;
+  if (registerNumber == REGISTER_NODE_INFO_ERRORS) return _lastError;
+  if (registerNumber == REGISTER_NODE_INFO_LOC_COM) return 0;
   return -1;
+  
 }
 
 
-#define REGISTER_DEVICE_NAME 0
-#define REGISTER_MODEL_ID 1
-#define REGISTER_DEVICE_REGISTER_COUNT 2
-
 void nodeInfoDeviceDefinition::getRegisterDescription(int registerNumber, char v[], int bufferLength){
   if (registerNumber < REGISTER_START_NUMBER) { deviceDefinition::getRegisterDescription(registerNumber, v, bufferLength); return; }
+
+  if (registerNumber == REGISTER_NODE_INFO_LAST_DEV_ID) {
+    descriptionSetRegsiterNumber( registerNumber,  v);
+    descriptionSetUoM("-",  v);
+    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_HEXINT2CHAR,  v);
+    descriptionSetLabel("LAST-DEV-ID",  v);
+    return;
+  }
   
+  if (registerNumber == REGISTER_NODE_INFO_ERRORS) {
+    descriptionSetRegsiterNumber( registerNumber,  v);
+    descriptionSetUoM("-",  v);
+    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_HEXINT4CHAR,  v);
+    descriptionSetLabel("ERR-STAT",  v);
+    return;
+  }
   
-  moveToBuffer("NodeInfo", v,  bufferLength);
+  if (registerNumber == REGISTER_NODE_INFO_LOC_COM) {
+    descriptionSetRegsiterNumber( registerNumber,  v);
+    descriptionSetUoM("-",  v);
+    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_BOOLEAN,  v);
+    descriptionSetLabel("LOC-COM",  v);
+    return;
+  }
 
 }

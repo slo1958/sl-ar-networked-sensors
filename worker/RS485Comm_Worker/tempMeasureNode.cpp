@@ -15,7 +15,7 @@ void tempMeasureDevice::getRegisterDescription(int registerNumber, char v[], int
 }
 
 int tempMeasureDevice::getRegisterIntegerValue(int registerNumber) {
-  if (registerNumber == REGISTER_DEVICE_REGISTER_COUNT) return 3;
+  if (registerNumber == REGISTER_DEVICE_REGISTER_LAST_ID) return 3;
 }
 
 //

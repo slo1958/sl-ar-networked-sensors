@@ -5,6 +5,8 @@
 #include "Arduino.h" 
 #include <EEPROM.h>
 
+#define REGISTER_DATA_TYPE_ERROR '@'
+
 #define REGISTER_DATA_TYPE_RO_BOOLEAN 'A'
 #define REGISTER_DATA_TYPE_RO_HEXINT2CHAR 'B'
 #define REGISTER_DATA_TYPE_RO_HEXINT4CHAR 'C'
@@ -19,8 +21,14 @@
 
 #define REGISTER_DEVICE_NAME 0
 #define REGISTER_MODEL_ID 1
-#define REGISTER_DEVICE_REGISTER_COUNT 2
-#define REGISTER_START_NUMBER 3
+#define REGISTER_DEVICE_REGISTER_LAST_ID 2
+#define REGISTER_DEVICE_BRAND 3
+
+#define REGISTER_START_NUMBER 0x10
+
+#define REGISTER_NODE_INFO_LAST_DEV_ID 0x10
+#define REGISTER_NODE_INFO_ERRORS 0x11
+#define REGISTER_NODE_INFO_LOC_COM 0x12
 
 #define NODE_DEVICE_ID 0
 
@@ -33,7 +41,7 @@ class deviceDefinition{
     
     void getModelID(char v[], int bufferLength);    
     void getName(char v[], int bufferLength);
-    int getRegisterCount();
+    int getRegisterLastID();
 
     void descriptionSetRegsiterNumber(int registerNumber, char v[]);
     void descriptionSetUoM(char UoM[], char v[]);
@@ -62,9 +70,11 @@ class nodeInfoDeviceDefinition: public deviceDefinition {
     int getRegisterIntegerValue(int registerNumber) override;
     void getRegisterDescription(int registerNumber, char v[], int bufferLength) override;
     void setLastDeviceID(int lastDeviceID);
-
+    void setLastError(int lastError);
+    
   protected:
     int _lastDeviceID;
+    int _lastError;
 
 };
 
