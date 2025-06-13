@@ -5,12 +5,13 @@
 #include "Arduino.h" 
 #include <SoftwareSerial.h>
 #include "SerialComm.h"
-#include "CommonBufferLib2.h"
+#include "simpleBuffer.h"
+ 
 
-class inputBufferHandler: public commonBufferHandler{
+class inputBufferHandler: public simpleBuffer{
 
   public:
-    inputBufferHandler(genericSerial p);
+    inputBufferHandler(genericSerial sr, char * pbuf, int len);
     bool inputCommandReady();
     long inputBufferAge();
     void clearBuffer() override;
@@ -24,6 +25,7 @@ class inputBufferHandler: public commonBufferHandler{
   private:
     genericSerial * _mySerial2;
     bool _BufferLocked;
+    int _BufferIndex;
     unsigned long _lastInputBufferReset;
     
 };

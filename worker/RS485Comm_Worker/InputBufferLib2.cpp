@@ -1,8 +1,8 @@
 
 #include "InputBufferLib2.h"
 
-inputBufferHandler::inputBufferHandler(genericSerial p){
-  _mySerial2 = &p;
+inputBufferHandler::inputBufferHandler(genericSerial sr, char * pbuf, int len) : simpleBuffer(pbuf, len){
+  _mySerial2 = &sr;
   clearBuffer();
 }
 
@@ -17,7 +17,8 @@ long inputBufferHandler::inputBufferAge(){
 
     
 void inputBufferHandler::clearBuffer(){
-  commonBufferHandler::clearBuffer();
+  simpleBuffer::clearBuffer();
+  _BufferIndex = 0;
   _BufferLocked = false;
   _lastInputBufferReset = millis();
 }
@@ -32,13 +33,13 @@ void inputBufferHandler::checkAnyMessage() {
   while (byteAvailable() > 0) {
     char x = byteRead();
     if (!isControl(x)) {
-      _Buffer[_BufferIndex] = x;
+      setCharAt(_BufferIndex,x);
       _BufferLocked = (x == ';');
       
       if (x == '*') {
         clearBuffer();
         _BufferLocked = false;
-      } else if (_BufferIndex < BUFFER_SIZE) _BufferIndex += 1;              
+      } else if (_BufferIndex < _len) _BufferIndex += 1;              
 
      
      _lastInputBufferReset = millis();

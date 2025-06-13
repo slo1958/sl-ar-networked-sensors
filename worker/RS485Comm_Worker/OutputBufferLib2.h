@@ -5,12 +5,12 @@
 #include "Arduino.h" 
 #include <SoftwareSerial.h>
 #include "SerialComm.h"
-#include "CommonBufferLib2.h"
+#include "simpleBuffer.h"
 
-class outputBufferHandler: public commonBufferHandler{
+class outputBufferHandler: public simpleBuffer{
 
   public:
-    outputBufferHandler(genericSerial p);
+    outputBufferHandler(genericSerial sr, char * pbuf, int len);
     void clearBuffer() override;
     void addBoolean(bool value);
     void setBooleanAt(bool value, int index);
@@ -22,6 +22,7 @@ class outputBufferHandler: public commonBufferHandler{
     
   private:
     genericSerial * _mySerial2;
+    int  _BufferIndex;
 };
 
 #endif

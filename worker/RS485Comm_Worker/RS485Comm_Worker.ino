@@ -44,6 +44,7 @@
 // Set Address command is enabled in normal mode if DI5 (BUTTON_IO) becomes high after setup, 
 // this will also clear the latest error indication
 
+#define KBUFFER_SIZE 32
 
 OneWire oneWire(ONE_WIRE_BUS_IO);
 DallasTemperature sensors(&oneWire);
@@ -67,15 +68,19 @@ bool AutoPollingMode = false;
 
 int SensorCount = 0;
 
- 
+char commInBuffer[KBUFFER_SIZE];
+char commOutBuffer[KBUFFER_SIZE];
+char rsNetInBuffer[KBUFFER_SIZE];
+char rsNetOutBuffer[KBUFFER_SIZE];
+
 hardwareSerial userControlSerial;
 softwareSerial rsNetworkSerial(SOFT_SERIAL_RX_IO, SOFT_SERIAL_TX_IO); // RX, TX
 
-inputBufferHandler userControlInput(userControlSerial);
-outputBufferHandler userControlOutput(userControlSerial);
+inputBufferHandler userControlInput(userControlSerial, commInBuffer, KBUFFER_SIZE);
+outputBufferHandler userControlOutput(userControlSerial, commOutBuffer, KBUFFER_SIZE);
 
-inputBufferHandler rsNetworkInput(rsNetworkSerial);
-outputBufferHandler rsNetworkOutput(rsNetworkSerial);
+inputBufferHandler rsNetworkInput(rsNetworkSerial, rsNetInBuffer, KBUFFER_SIZE);
+outputBufferHandler rsNetworkOutput(rsNetworkSerial, rsNetOutBuffer, KBUFFER_SIZE);
 
 void setup(void) {
   

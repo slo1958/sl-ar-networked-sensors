@@ -2,33 +2,34 @@
 #include "OutputBufferLib2.h"
 
 
-outputBufferHandler::outputBufferHandler(genericSerial p){
-  _mySerial2 = &p;
+outputBufferHandler::outputBufferHandler(genericSerial sr, char * pbuf, int len) : simpleBuffer(pbuf, len){
+  _mySerial2 = &sr;
   clearBuffer();
 }
 
 void outputBufferHandler::clearBuffer() {
-  commonBufferHandler::clearBuffer();
+  simpleBuffer::clearBuffer();
+  _BufferIndex=0;
 }
 
 void outputBufferHandler::addBoolean(bool value) {
   setBooleanAt(value, _BufferIndex);
   _BufferIndex += 1;
-  _Buffer[_BufferIndex] = 0; 
+  setCharAt(_BufferIndex, 0);
 
 }
 
 
 
 void outputBufferHandler::addChar(char cc){
-  _Buffer[_BufferIndex] = cc;
+  setCharAt(_BufferIndex, cc);
   _BufferIndex += 1;
-  _Buffer[_BufferIndex] = 0;
+  setCharAt(_BufferIndex, 0);
 }
 
 
 void outputBufferHandler::endBuffer(){
-  _Buffer[_BufferIndex] = ';';
+  setCharAt(_BufferIndex, ';');
   _BufferIndex += 1;
-  _Buffer[_BufferIndex] = 0;
+  setCharAt(_BufferIndex, 0);
 }
