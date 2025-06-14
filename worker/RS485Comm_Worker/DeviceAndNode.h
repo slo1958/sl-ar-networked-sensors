@@ -4,6 +4,7 @@
 
 #include "Arduino.h" 
 #include <EEPROM.h>
+#include "simpleBuffer.h"
 
 #define REGISTER_DATA_TYPE_ERROR '@'
 
@@ -32,27 +33,24 @@
 
 #define NODE_DEVICE_ID 0
 
-// ==== Device
+
+// ==== Generic device
 
 class deviceDefinition{
   public:
     deviceDefinition();
     virtual void configureDevice();
     
-    void getModelID(char v[], int bufferLength);    
-    void getName(char v[], int bufferLength);
+    void getModelID(simpleBuffer spb);    
+    void getName(simpleBuffer spb);
     int getRegisterLastID();
 
-    void descriptionSetRegsiterNumber(int registerNumber, char v[]);
-    void descriptionSetUoM(char UoM[], char v[]);
-    void descriptionSetRWMode(char mode, char v[]);
-    void descriptionSetLabel(char label[], char v[]);
+    void setRegisterDescription(int registerNumber, char UoM[], char mode, char label[], simpleBuffer spb);
     
-    virtual void getRegisterDescription(int registerNumber, char v[], int bufferLength);
+    virtual void getRegisterDescription(int registerNumber, simpleBuffer spb);
 
-    virtual void getRegisterValue(int registerNumber, char v[], int bufferLength);
-    virtual void setRegisterValue(int registerNumber, char v[], int bufferLength);
-
+    virtual void getRegisterValue(int registerNumber, simpleBuffer spb);
+    virtual void setRegisterValue(int registerNumber, simpleBuffer spb);
 
     virtual int getRegisterIntegerValue(int registerNumber);
     virtual int setRegisterIntegerValue(int registerNumber);
@@ -62,13 +60,14 @@ class deviceDefinition{
     int _FlashLedMode;
 };
 
+// ==== Node information device
 
 class nodeInfoDeviceDefinition: public deviceDefinition {
   public:
     nodeInfoDeviceDefinition();
     void configureDevice() override;
     int getRegisterIntegerValue(int registerNumber) override;
-    void getRegisterDescription(int registerNumber, char v[], int bufferLength) override;
+    void getRegisterDescription(int registerNumber, simpleBuffer spb) override;
     void setLastDeviceID(int lastDeviceID);
     void setLastError(int lastError);
     
@@ -79,7 +78,8 @@ class nodeInfoDeviceDefinition: public deviceDefinition {
 };
 
 
-// ==== NODE
+// ==== Node
+
 class nodeDefinition{
   public:
     nodeDefinition();
@@ -96,7 +96,7 @@ class nodeDefinition{
     virtual int getLastDeviceID();
     virtual deviceDefinition* getDevice(int deviceNumber);
     
-    void getRegisterDescription(int deviceNumber, int registerNumber, char v[], int bufferLength);
+    void getRegisterDescription(int deviceNumber, int registerNumber, simpleBuffer spb);
     void getRegisterValue(int deviceNumber, int registerNumber);
     void setRegisterValue(int deviceNumber, int registerNumber);  
 

@@ -7,20 +7,31 @@ simpleBuffer::simpleBuffer(char * p, int len) {
   _len = len;
 }
 
+//
+//void simpleBuffer::moveChars(const char source[], int destpos){
+//  int i;
+//  for (i=0;source[i] != 0; i++) _buf[destpos+i] = source[i];
+//  _buf[destpos+i] = 0;    
+//}
 
-void simpleBuffer::moveChars(const char source[], int destpos){
+void simpleBuffer::moveChars(int offset, const char source[], int maxlen){
   int i;
-  for (i=0;source[i] != 0; i++) _buf[destpos+i] = source[i];
-  _buf[destpos+i] = 0;    
+  for (i=0;(source[i] != 0 && i<maxlen); i++) _buf[offset+i] = source[i];
+  _buf[offset+i] = 0;  
 }
 
-
-void simpleBuffer::moveBytes(char source[], int movelen, int destpos){
+void simpleBuffer::moveBytes(int offset, char source[], int movelen){
   int i;
-    for (i=0;i < movelen; i++) _buf[destpos+i] = source[i];
-    _buf[destpos+i] = 0;     
+    for (i=0;i < movelen; i++) _buf[offset+i] = source[i]; 
 }
 
+void simpleBuffer::replaceChar(char findChar, char replChar){
+  int i;
+  for (i=0; i<_len; i++) if(_buf[i] == findChar) _buf[i] = replChar;
+  return;
+}
+
+    
 void simpleBuffer::clearBuffer(){
   int i;
     for (i=0;i < _len; i++) _buf[i] = 0;
@@ -61,19 +72,19 @@ int simpleBuffer::getHexByteAt(int offset) {
   if (v1 >= 0 && v2 >=0 ) return v1*16+v2;
   return -1;
 }
-
-int simpleBuffer::getHexWordAt(int offset){
-  int v1 = getHexByteAt(offset);
-  int v2 = getHexByteAt(offset+2);
-  if (v1 >= 0 && v2 >=0 ) return v1*256+v2;
-  return -1;
-}
-
-long simpleBuffer::getHexLongAt(int offset){
-  long v1 = getHexWordAt(offset);
-  long v2 = getHexWordAt(offset+4);
-  if (v1 >= 0 && v2 >=0 ) return v1*65536+v2;
-  return -1;
+ 
+long simpleBuffer::getHexDigitsAt(int offset, int limit){
+    int j;
+    int32_t w;
+    w = (('0' <= getCharAt(offset) && getCharAt(offset) <= '7') ? 0 : 0xFFFFFFFF);
+    for (j=0; j<limit; j++) {
+        int8_t c = getCharAt(offset+j);
+        c = (('0' <= c) && (c <= '9') ? c-'0' : (('A' <= c) && (c <= 'F') ? c - 'A' + 10 : -1));
+        w = (w << 4) & 0xFFFFFFF0 | (c & 0xF);
+    }
+    
+    return w;
+  
 }
 
 void simpleBuffer::setCharAt(int offset, char c){
@@ -93,29 +104,16 @@ void simpleBuffer::setHexDigitAt(int offset, int v){
 }
 
 
+void simpleBuffer::setHexDigitsAt(int offset, long v, int limit){
+    int j;
+    long w = v;
+    for (j=limit-1; j>=0; j--){
+        int8_t c = w & 0xF;
+        setCharAt(offset+j, (c < 10 ? c + '0' : c - 10 + 'A'));
+        w = w >> 4;
+    }
+}
+
 void simpleBuffer::setHexByteAt(int offset, int v) {
-    int8_t c = v % 16;
-    setCharAt(offset+1, (c < 10 ? c + '0' : c - 10 + 'A'));
-    
-    c = v / 16;
-    setCharAt(offset, (c < 10 ? c + '0' : c - 10 + 'A'));
-}
-
-
-void simpleBuffer::setHexWordAt(int offset, int v){
-   uint16_t c = v % 256;
-   setHexByteAt(offset+2, c);
-   
-   c = v / 256;
-   setHexByteAt(offset, c);
-   
-}
-
-void simpleBuffer::setHexLongAt(int offset, long v){
-    uint32_t c = v % 65536;
-    setHexWordAt(offset+4, c);
-    
-    c = v / 65536;
-    setHexWordAt(offset, c);
-
+    setHexDigitsAt(offset, v, 2);
 }

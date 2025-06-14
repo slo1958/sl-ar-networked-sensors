@@ -9,24 +9,28 @@
 class simpleBuffer{
   public:
     simpleBuffer(char * p, int len);
-    void moveChars(const char source[], int destpos);
-    void moveBytes(char source[], int movelen, int destpos);
+        
+    void moveChars(int offset, const char source[], int maxlen);
+    void moveBytes(int offset, char source[], int movelen);
+
+    void replaceChar(char findChar, char replChar);
+    
     virtual void clearBuffer();
+    
     bool anyData();
     
     char getCharAt(int offset);
     int getDigitAt(int offset);
     int getHexDigitAt(int offset);
+    long getHexDigitsAt(int offset, int limit);
     int getHexByteAt(int offset);
-    int getHexWordAt(int offset);
-    long getHexLongAt(int offset);
-     
+ 
     void setCharAt(int offset, char c);
     void setDigitAt(int offset, int v);
+    void setHexDigitsAt(int offset, long v, int limit);
     void setHexDigitAt(int offset, int v);
     void setHexByteAt(int offset, int v);   
-    void setHexWordAt(int offset, int v);   
-    void setHexLongAt(int offset, long v);
+ 
        
   protected:
     char * _buf;

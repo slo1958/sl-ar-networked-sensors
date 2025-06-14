@@ -38,9 +38,9 @@ bool nodeDefinition::getFlashLedMode(){
 }
 
 
-void nodeDefinition::getRegisterDescription(int deviceNumber, int registerNumber, char v[], int bufferLength){
+void nodeDefinition::getRegisterDescription(int deviceNumber, int registerNumber, simpleBuffer spb){
   deviceDefinition* temp = getDevice(deviceNumber);
-  temp->getRegisterDescription(registerNumber, v, bufferLength);
+  temp->getRegisterDescription(registerNumber, spb);
   ;
 }
 
@@ -89,57 +89,42 @@ void deviceDefinition::configureDevice(){
 }
 
 
-void deviceDefinition::getRegisterDescription(int registerNumber, char v[], int bufferLength){
-  clearBuffer(v, bufferLength);
-  
+void deviceDefinition::getRegisterDescription(int registerNumber, simpleBuffer spb){
+  spb.clearBuffer();
+
   if (registerNumber == REGISTER_DEVICE_NAME) {
-    descriptionSetRegsiterNumber( registerNumber,  v);
-    descriptionSetUoM("-",  v);
-    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_STR,  v);
-    descriptionSetLabel("NAME",  v);
+    setRegisterDescription( registerNumber, "-", REGISTER_DATA_TYPE_RO_STR, "NAME",  spb);
     return;
   }
 
   if (registerNumber == REGISTER_MODEL_ID) {
-    descriptionSetRegsiterNumber( registerNumber,  v);
-    descriptionSetUoM("-",  v);
-    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_STR,  v);
-    descriptionSetLabel("MODEL-ID",  v);
+    setRegisterDescription( registerNumber, "-", REGISTER_DATA_TYPE_RO_STR, "MODEL-ID", spb);
     return;
   }
 
 
   if (registerNumber == REGISTER_DEVICE_BRAND) {
-    descriptionSetRegsiterNumber( registerNumber,  v);
-    descriptionSetUoM("-",  v);
-    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_STR,  v);
-    descriptionSetLabel("BRAND",  v);
+    setRegisterDescription( registerNumber, "-", REGISTER_DATA_TYPE_RO_STR, "BRAND", spb);
     return;
   }
   
   if (registerNumber == REGISTER_DEVICE_REGISTER_LAST_ID) {
-    descriptionSetRegsiterNumber( registerNumber,  v);
-    descriptionSetUoM("-",  v);
-    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_HEXINT2CHAR,  v);
-    descriptionSetLabel("LAST-REG-ID",  v);
+    setRegisterDescription( registerNumber, "-", REGISTER_DATA_TYPE_RO_HEXINT2CHAR, "LAST-REG-ID", spb);
     return;
   }
 
-  descriptionSetRegsiterNumber( registerNumber,  v);
-  descriptionSetUoM("-",  v);
-  descriptionSetRWMode(REGISTER_DATA_TYPE_ERROR,  v);
-  descriptionSetLabel("NOT-FOUND",  v);
+  setRegisterDescription(registerNumber, "-", REGISTER_DATA_TYPE_ERROR, "NOT-FOUND", spb);
   return;
   
 }
 
 
-void deviceDefinition::getRegisterValue(int registerNumber, char v[], int bufferLength){
+void deviceDefinition::getRegisterValue(int registerNumber, simpleBuffer spb){
 
 }
 
 
-void deviceDefinition::setRegisterValue(int registerNumber, char v[], int bufferLength){
+void deviceDefinition::setRegisterValue(int registerNumber, simpleBuffer spb){
   
 }
 
@@ -152,13 +137,13 @@ int deviceDefinition::setRegisterIntegerValue(int registerNumber){
   
 } 
 
-void deviceDefinition::getModelID(char v[], int bufferLength) {
-    getRegisterValue(REGISTER_MODEL_ID, v, bufferLength);
+void deviceDefinition::getModelID(simpleBuffer spb) {
+    getRegisterValue(REGISTER_MODEL_ID, spb);
 }
 
 
-void deviceDefinition::getName(char v[], int bufferLength){
-    getRegisterValue(REGISTER_DEVICE_NAME, v, bufferLength);
+void deviceDefinition::getName(simpleBuffer spb){
+    getRegisterValue(REGISTER_DEVICE_NAME, spb);
 }
 
 
@@ -168,30 +153,17 @@ int deviceDefinition::getRegisterLastID(){
 
 
 #define DESC_OFFSET_REG_NUMBER 0
-#define DESC_OFFSET_UOM 1
-#define DESC_OFFSET_RW_MODE 5
-#define DESC_OFFSET_LABEL 6
+#define DESC_OFFSET_UOM 2
+#define DESC_OFFSET_RW_MODE 6
+#define DESC_OFFSET_LABEL 7
 #define DESC_OFFSET_MAX 15
 
-void deviceDefinition::descriptionSetRegsiterNumber(int registerNumber, char v[]){
-  v[DESC_OFFSET_REG_NUMBER] = '0' + registerNumber;
-}
 
-void deviceDefinition::descriptionSetUoM(char UoM[], char v[]){
-  v[DESC_OFFSET_UOM] = UoM[0];
-  v[DESC_OFFSET_UOM+1] = UoM[1];
-  if (UoM[1] == 0) return;
-  v[DESC_OFFSET_UOM+2] = UoM[2];
-  v[DESC_OFFSET_UOM+3] = 0;
-  return;
-}
-
-void deviceDefinition::descriptionSetRWMode(char mode, char v[]){
-  v[DESC_OFFSET_RW_MODE] = mode;
-}
-
-void deviceDefinition::descriptionSetLabel(char label[], char v[]){
- moveToBuffer(label, v[DESC_OFFSET_LABEL],DESC_OFFSET_MAX - DESC_OFFSET_LABEL );
+void deviceDefinition::setRegisterDescription(int registerNumber, char UoM[], char mode, char label[], simpleBuffer spb){
+ spb.setHexByteAt(DESC_OFFSET_REG_NUMBER, registerNumber);
+ spb.moveChars(DESC_OFFSET_UOM, UoM, 3);
+ spb.setCharAt(DESC_OFFSET_RW_MODE, mode);
+ spb.moveChars(DESC_OFFSET_LABEL, label, 10);
  return;
 }
 
@@ -225,30 +197,21 @@ int nodeInfoDeviceDefinition::getRegisterIntegerValue(int registerNumber) {
 }
 
 
-void nodeInfoDeviceDefinition::getRegisterDescription(int registerNumber, char v[], int bufferLength){
-  if (registerNumber < REGISTER_START_NUMBER) { deviceDefinition::getRegisterDescription(registerNumber, v, bufferLength); return; }
+void nodeInfoDeviceDefinition::getRegisterDescription(int registerNumber, simpleBuffer spb){
+  if (registerNumber < REGISTER_START_NUMBER) { deviceDefinition::getRegisterDescription(registerNumber, spb); return; }
 
   if (registerNumber == REGISTER_NODE_INFO_LAST_DEV_ID) {
-    descriptionSetRegsiterNumber( registerNumber,  v);
-    descriptionSetUoM("-",  v);
-    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_HEXINT2CHAR,  v);
-    descriptionSetLabel("LAST-DEV-ID",  v);
+    setRegisterDescription(registerNumber, "-", REGISTER_DATA_TYPE_RO_HEXINT2CHAR, "LAST-DEV-ID", spb);
     return;
   }
   
   if (registerNumber == REGISTER_NODE_INFO_ERRORS) {
-    descriptionSetRegsiterNumber( registerNumber,  v);
-    descriptionSetUoM("-",  v);
-    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_HEXINT4CHAR,  v);
-    descriptionSetLabel("ERR-STAT",  v);
+    setRegisterDescription(registerNumber, "-", REGISTER_DATA_TYPE_RO_HEXINT4CHAR, "ERR-STAT", spb);
     return;
   }
   
   if (registerNumber == REGISTER_NODE_INFO_LOC_COM) {
-    descriptionSetRegsiterNumber( registerNumber,  v);
-    descriptionSetUoM("-",  v);
-    descriptionSetRWMode(REGISTER_DATA_TYPE_RO_BOOLEAN,  v);
-    descriptionSetLabel("LOC-COM",  v);
+    setRegisterDescription(registerNumber, "-", REGISTER_DATA_TYPE_RO_BOOLEAN, "LOC-COM", spb);
     return;
   }
 

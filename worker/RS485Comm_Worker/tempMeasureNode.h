@@ -10,7 +10,7 @@
 class tempMeasureDevice: public deviceDefinition{
   public:
     tempMeasureDevice();
-    void getRegisterDescription(int registerNumber, char v[], int bufferLength) override;
+    void getRegisterDescription(int registerNumber, simpleBuffer spb) override;
     int getRegisterIntegerValue(int registerNumber) override;
   
 };

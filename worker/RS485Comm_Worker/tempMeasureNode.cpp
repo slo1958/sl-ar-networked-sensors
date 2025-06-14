@@ -10,8 +10,8 @@ tempMeasureDevice::tempMeasureDevice(){
   
 }
 
-void tempMeasureDevice::getRegisterDescription(int registerNumber, char v[], int bufferLength){
-  
+void tempMeasureDevice::getRegisterDescription(int registerNumber, simpleBuffer spb){
+    if (registerNumber < REGISTER_START_NUMBER) { deviceDefinition::getRegisterDescription(registerNumber, spb); return; }
 }
 
 int tempMeasureDevice::getRegisterIntegerValue(int registerNumber) {
