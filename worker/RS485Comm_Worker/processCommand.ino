@@ -1,4 +1,4 @@
-dev#include "DeviceAndNode.h"
+#include "DeviceAndNode.h"
 #include "InputBufferLib2.h"
 #include "OutputBufferLib2.h"
 
@@ -69,25 +69,16 @@ int extractCheckedAddress(inputBufferHandler inbuf) {
 }
 
 
-void requestNodeRegisterDescription(nodeDefinition node, inputBufferHandler inbuf, outputBufferHandler outbuf, int registerNumber){
-  
-}
 
 void requestDeviceRegisterDescription(nodeDefinition node, inputBufferHandler inbuf, outputBufferHandler outbuf, int deviceNumber, int registerNumber) {
   
 }
   
-void requestNodeRegisterValue(nodeDefinition node, inputBufferHandler inbuf, outputBufferHandler outbuf, int registerNumber){
-  
-}
 
 void requestDeviceRegisterValue(nodeDefinition node, inputBufferHandler inbuf, outputBufferHandler outbuf, int deviceNumber, int registerNumber) {
   
 }
 
-void updateNodeRegisterValue(nodeDefinition node, inputBufferHandler inbuf, outputBufferHandler outbuf, int registerNumber){
-  
-}
 
 void updateDeviceRegisterValue(nodeDefinition node, inputBufferHandler inbuf, outputBufferHandler outbuf, int deviceNumber, int registerNumber) {
   
@@ -150,17 +141,12 @@ void processCommand(nodeDefinition node, inputBufferHandler inbuf, outputBufferH
   int deviceNumber = inbuf.getHexByteAt(CMD_START+1);
   int registerNumber = inbuf.getHexByteAt(CMD_START+2);
   
-  if ((cmd == CMD_GET_REGISTER_DESCRIPTION) && (deviceNumber == 0)) { requestNodeRegisterDescription(node, inbuf, outbuf, registerNumber );inbuf.clearBuffer();return;}
 
-  if ((cmd == CMD_GET_REGISTER_DESCRIPTION) && (deviceNumber > 0)) { requestDeviceRegisterDescription(node, inbuf, outbuf, deviceNumber, registerNumber);inbuf.clearBuffer();return;}
+  if (cmd == CMD_GET_REGISTER_DESCRIPTION) { requestDeviceRegisterDescription(node, inbuf, outbuf, deviceNumber, registerNumber);inbuf.clearBuffer();return;}
 
-  if ((cmd == CMD_GET_REGISTER_VALUE) && (deviceNumber == 0)) { requestNodeRegisterValue(node, inbuf, outbuf, registerNumber );inbuf.clearBuffer();return;}
+  if (cmd == CMD_GET_REGISTER_VALUE)  { requestDeviceRegisterValue(node, inbuf, outbuf, deviceNumber, registerNumber);inbuf.clearBuffer();return;}
 
-  if ((cmd == CMD_GET_REGISTER_VALUE) && (deviceNumber > 0)) { requestDeviceRegisterValue(node, inbuf, outbuf, deviceNumber, registerNumber);inbuf.clearBuffer();return;}
-
-  if ((cmd == CMD_SET_REGISTER_VALUE) && (deviceNumber == 0)) { updateNodeRegisterValue(node, inbuf, outbuf, registerNumber );inbuf.clearBuffer();return;}
-
-  if ((cmd == CMD_SET_REGISTER_VALUE) && (deviceNumber > 0)) { updateDeviceRegisterValue(node, inbuf, outbuf, deviceNumber, registerNumber);inbuf.clearBuffer();return;}
+  if (cmd == CMD_SET_REGISTER_VALUE) { updateDeviceRegisterValue(node, inbuf, outbuf, deviceNumber, registerNumber);inbuf.clearBuffer();return;}
 
   
 }

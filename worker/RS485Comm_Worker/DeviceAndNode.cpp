@@ -4,8 +4,9 @@
 #define MAX_ADDRESS 63
 #define EEPROMAddress_DeviceID 1
 
-
-// Node definition
+//
+// Generic Node definition
+//
 nodeDefinition::nodeDefinition(){
   _NodeAddr = EEPROM.read(EEPROMAddress_DeviceID);
 
@@ -45,18 +46,20 @@ void nodeDefinition::getRegisterDescription(int deviceNumber, int registerNumber
 }
 
 
-void nodeDefinition::getRegisterValue(int deviceNumber, int registerNumber){
-  ;
+void nodeDefinition::getRegisterValue(int deviceNumber, int registerNumber, simpleBuffer spb){
+  deviceDefinition* temp = getDevice(deviceNumber);
+  temp->getRegisterValue(registerNumber, spb); 
 }
 
     
-void nodeDefinition::setRegisterValue(int deviceNumber, int registerNumber){
-  ;
+void nodeDefinition::setRegisterValue(int deviceNumber, int registerNumber, simpleBuffer spb){
+  deviceDefinition* temp = getDevice(deviceNumber);
+  
 }
 
 deviceDefinition* nodeDefinition::getDevice(int deviceNumber){
-  if (deviceNumber == NODE_DEVICE_ID) return &_baseDevice
-  ;
+  if (deviceNumber == NODE_INFO_DEVICE_ID) return &_baseDevice;
+  return NULL;
 }
 
 int nodeDefinition::getLastDeviceID(){
@@ -64,8 +67,13 @@ int nodeDefinition::getLastDeviceID(){
 }
 
 
+void nodeDefinition::configureCommonNode(){
+  
+}
 
-// DEVICE
+// 
+// Generic device definition
+//
 
 int moveToBuffer(char inBuffer[], char outBuffer[], int outBufferSize){
     int i;
@@ -79,6 +87,7 @@ void clearBuffer(char v[], int bufferLength){
   for (i=0; i< bufferLength; i++) v[i]=0;  
 }
 
+
 deviceDefinition::deviceDefinition(){
 
 }
@@ -88,39 +97,47 @@ void deviceDefinition::configureDevice(){
   
 }
 
-
+//
+// Describe the registers expected in all devices
+//
 void deviceDefinition::getRegisterDescription(int registerNumber, simpleBuffer spb){
   spb.clearBuffer();
 
   if (registerNumber == REGISTER_DEVICE_NAME) {
-    setRegisterDescription( registerNumber, "-", REGISTER_DATA_TYPE_RO_STR, "NAME",  spb);
+    storeRegisterDescriptionInBuffer( registerNumber, "-", REGISTER_DATA_TYPE_STR, REGISTER_MODE_RO, "NAME",  spb);
     return;
   }
 
   if (registerNumber == REGISTER_MODEL_ID) {
-    setRegisterDescription( registerNumber, "-", REGISTER_DATA_TYPE_RO_STR, "MODEL-ID", spb);
+    storeRegisterDescriptionInBuffer( registerNumber, "-", REGISTER_DATA_TYPE_STR, REGISTER_MODE_RO, "MODEL-ID", spb);
     return;
   }
 
 
   if (registerNumber == REGISTER_DEVICE_BRAND) {
-    setRegisterDescription( registerNumber, "-", REGISTER_DATA_TYPE_RO_STR, "BRAND", spb);
+    storeRegisterDescriptionInBuffer( registerNumber, "-", REGISTER_DATA_TYPE_STR, REGISTER_MODE_RO, "BRAND", spb);
     return;
   }
   
   if (registerNumber == REGISTER_DEVICE_REGISTER_LAST_ID) {
-    setRegisterDescription( registerNumber, "-", REGISTER_DATA_TYPE_RO_HEXINT2CHAR, "LAST-REG-ID", spb);
+    storeRegisterDescriptionInBuffer( registerNumber, "-", REGISTER_DATA_TYPE_HEXINT2CHAR, REGISTER_MODE_RO, "LAST-REG-ID", spb);
     return;
   }
 
-  setRegisterDescription(registerNumber, "-", REGISTER_DATA_TYPE_ERROR, "NOT-FOUND", spb);
+  if (registerNumber == REGISTER_DEVICE_ACTIVE) {
+    storeRegisterDescriptionInBuffer( registerNumber, "-", REGISTER_DATA_TYPE_BOOLEAN, REGISTER_MODE_RO, "ACTIVE", spb);
+    return;    
+  }
+  
+  storeRegisterDescriptionInBuffer(registerNumber, "-", REGISTER_DATA_TYPE_ERROR, REGISTER_MODE_ERROR, "NOT-FOUND", spb);
   return;
   
 }
 
 
 void deviceDefinition::getRegisterValue(int registerNumber, simpleBuffer spb){
-
+  spb.clearBuffer();
+  return;
 }
 
 
@@ -128,43 +145,81 @@ void deviceDefinition::setRegisterValue(int registerNumber, simpleBuffer spb){
   
 }
 
-
-int deviceDefinition::getRegisterIntegerValue(int registerNumber){
-  
-}
-    
-int deviceDefinition::setRegisterIntegerValue(int registerNumber){
-  
-} 
-
-void deviceDefinition::getModelID(simpleBuffer spb) {
-    getRegisterValue(REGISTER_MODEL_ID, spb);
-}
-
-
-void deviceDefinition::getName(simpleBuffer spb){
-    getRegisterValue(REGISTER_DEVICE_NAME, spb);
-}
-
-
-int deviceDefinition::getRegisterLastID(){
-  return getRegisterIntegerValue(REGISTER_DEVICE_REGISTER_LAST_ID);
-}
-
-
+ 
 #define DESC_OFFSET_REG_NUMBER 0
 #define DESC_OFFSET_UOM 2
 #define DESC_OFFSET_RW_MODE 6
-#define DESC_OFFSET_LABEL 7
+#define DESC_OFFSET_DATATYPE 7
+#define DESC_OFFSET_LABEL 8
 #define DESC_OFFSET_MAX 15
 
+#define DESC_LEN_UOM 3
+#define DESC_LEN_LABEL 8
 
-void deviceDefinition::setRegisterDescription(int registerNumber, char UoM[], char mode, char label[], simpleBuffer spb){
+void deviceDefinition::storeRegisterDescriptionInBuffer(int registerNumber, char UoM[], char datatype, char mode, char label[], simpleBuffer spb){
  spb.setHexByteAt(DESC_OFFSET_REG_NUMBER, registerNumber);
- spb.moveChars(DESC_OFFSET_UOM, UoM, 3);
+ spb.moveChars(DESC_OFFSET_UOM, UoM, DESC_LEN_UOM);
  spb.setCharAt(DESC_OFFSET_RW_MODE, mode);
- spb.moveChars(DESC_OFFSET_LABEL, label, 10);
+ spb.setCharAt(DESC_OFFSET_DATATYPE, datatype);
+ spb.moveChars(DESC_OFFSET_LABEL, label, DESC_LEN_LABEL);
  return;
+}
+
+#define VAL_OFFSET_REG_NUMBER 0
+#define VAL_OFFSET_DATATYPE 2
+#define VAL_OFFSET_VALUE 3
+#define VAL_OFFSET_MAX 15
+
+#define VAL_LEN_VALUE 10
+
+void deviceDefinition::storeRegisterNoValueInBuffer(int registerNumber, simpleBuffer spb){
+  spb.setHexByteAt(VAL_OFFSET_REG_NUMBER, registerNumber);
+  spb.setCharAt(VAL_OFFSET_DATATYPE, REGISTER_DATA_TYPE_ERROR);
+  spb.setCharAt(VAL_OFFSET_VALUE, REGISTER_DATA_TYPE_ERROR);
+}
+    
+void deviceDefinition::storeRegisterValueInBuffer(int registerNumber, char value[], simpleBuffer spb){
+  spb.setHexByteAt(VAL_OFFSET_REG_NUMBER, registerNumber);
+  spb.setCharAt(VAL_OFFSET_DATATYPE, REGISTER_DATA_TYPE_STR);  
+  spb.moveChars(VAL_OFFSET_VALUE, value, VAL_LEN_VALUE);
+}
+
+void deviceDefinition::loadRegisterValueFromBuffer(int registerNumber,  simpleBuffer spb){
+  
+}
+
+void deviceDefinition::storeRegisterBoolValueInBuffer(int registerNumber, bool value, simpleBuffer spb){
+  spb.setHexByteAt(VAL_OFFSET_REG_NUMBER, registerNumber);
+  spb.setCharAt(VAL_OFFSET_DATATYPE, REGISTER_DATA_TYPE_BOOLEAN); 
+  spb.setCharAt(VAL_OFFSET_VALUE, (value ? '1':'0'));
+}
+
+void deviceDefinition::storeRegisterInt2ValueInBuffer(int registerNumber, int value, simpleBuffer spb){
+  spb.setHexByteAt(VAL_OFFSET_REG_NUMBER, registerNumber);
+  spb.setCharAt(VAL_OFFSET_DATATYPE, REGISTER_DATA_TYPE_HEXINT2CHAR); 
+  spb.setHexByteAt(VAL_OFFSET_VALUE, value);
+}
+
+void deviceDefinition::loadRegisterInt2ValueFromBuffer(int registerNumber, simpleBuffer spb){
+
+}
+
+void deviceDefinition::storeRegisterInt4ValueInBuffer(int registerNumber, int value, simpleBuffer spb){
+  spb.setHexByteAt(VAL_OFFSET_REG_NUMBER, registerNumber);
+  spb.setCharAt(VAL_OFFSET_DATATYPE, REGISTER_DATA_TYPE_HEXINT4CHAR); 
+  spb.setHexDigitsAt(VAL_OFFSET_VALUE, value, 4);
+}
+
+
+void deviceDefinition::storeRegisterScaledFloatValueInBuffer(int registerNumber, long value, simpleBuffer spb){
+  spb.setHexByteAt(VAL_OFFSET_REG_NUMBER, registerNumber);
+  spb.setCharAt(VAL_OFFSET_DATATYPE, REGISTER_DATA_TYPE_SCALEDFLOAT);    
+  spb.setSignedHexDigitsAt(VAL_OFFSET_VALUE, value, 8);
+}
+
+
+void deviceDefinition::loadRegisterInt4ValueFromBuffer(int registerNumber, simpleBuffer spb){
+
 }
 
 
@@ -187,32 +242,73 @@ void nodeInfoDeviceDefinition::setLastError(int lastError){
   _lastError = lastError;
 }
     
-int nodeInfoDeviceDefinition::getRegisterIntegerValue(int registerNumber) {
-  if (registerNumber == REGISTER_DEVICE_REGISTER_LAST_ID) return 5;
-  if (registerNumber == REGISTER_NODE_INFO_LAST_DEV_ID) return _lastDeviceID;
-  if (registerNumber == REGISTER_NODE_INFO_ERRORS) return _lastError;
-  if (registerNumber == REGISTER_NODE_INFO_LOC_COM) return 0;
-  return -1;
+ 
+void nodeInfoDeviceDefinition::getRegisterDescription(int registerNumber, simpleBuffer spb){
+  if (registerNumber < CUSTOM_REGISTER_START_NUMBER) { deviceDefinition::getRegisterDescription(registerNumber, spb); return; }
   
+  switch (registerNumber) {
+    
+    case REGISTER_NODE_INFO_LAST_DEV_ID:
+        storeRegisterDescriptionInBuffer(registerNumber, "-", REGISTER_DATA_TYPE_HEXINT2CHAR, REGISTER_MODE_RO, "LAST-DEV-ID", spb);
+        break;
+    
+    case REGISTER_NODE_INFO_ERRORS:
+        storeRegisterDescriptionInBuffer(registerNumber, "-", REGISTER_DATA_TYPE_HEXINT4CHAR, REGISTER_MODE_RO, "ERR-STAT", spb);
+        break;
+  
+    case REGISTER_NODE_INFO_LOC_COM:
+        storeRegisterDescriptionInBuffer(registerNumber, "-", REGISTER_DATA_TYPE_BOOLEAN, REGISTER_MODE_RO, "LOC-COM", spb);
+        break;
+        
+    default:
+        storeRegisterDescriptionInBuffer(registerNumber, "-", REGISTER_DATA_TYPE_ERROR, REGISTER_MODE_ERROR, "ERROR", spb);  
+  }
+  
+  return;
+   
 }
 
 
-void nodeInfoDeviceDefinition::getRegisterDescription(int registerNumber, simpleBuffer spb){
-  if (registerNumber < REGISTER_START_NUMBER) { deviceDefinition::getRegisterDescription(registerNumber, spb); return; }
 
-  if (registerNumber == REGISTER_NODE_INFO_LAST_DEV_ID) {
-    setRegisterDescription(registerNumber, "-", REGISTER_DATA_TYPE_RO_HEXINT2CHAR, "LAST-DEV-ID", spb);
-    return;
+void nodeInfoDeviceDefinition::getRegisterValue(int registerNumber, simpleBuffer spb){
+  
+  switch (registerNumber) {
+  // common registers
+    case REGISTER_DEVICE_NAME:
+      break;
+
+    case REGISTER_MODEL_ID:
+      break;
+      
+    case REGISTER_DEVICE_BRAND:
+      break;
+
+    case REGISTER_DEVICE_REGISTER_LAST_ID:
+      break;
+
+  // device specific registers
+    case REGISTER_NODE_INFO_LAST_DEV_ID:
+        storeRegisterInt2ValueInBuffer( registerNumber, NODE_INFO_DEVICE_LAST_REGISTER,  spb);
+        break;
+    
+    case REGISTER_NODE_INFO_ERRORS:
+        storeRegisterInt4ValueInBuffer( registerNumber, _lastError,  spb);
+        break;
+  
+    case REGISTER_NODE_INFO_LOC_COM:
+        storeRegisterBoolValueInBuffer(registerNumber, false , spb);
+        break;
+        
+    default:
+        ;  
   }
   
-  if (registerNumber == REGISTER_NODE_INFO_ERRORS) {
-    setRegisterDescription(registerNumber, "-", REGISTER_DATA_TYPE_RO_HEXINT4CHAR, "ERR-STAT", spb);
-    return;
-  }
-  
-  if (registerNumber == REGISTER_NODE_INFO_LOC_COM) {
-    setRegisterDescription(registerNumber, "-", REGISTER_DATA_TYPE_RO_BOOLEAN, "LOC-COM", spb);
-    return;
-  }
+  return;
+   
 
+}
+
+
+void nodeInfoDeviceDefinition::setRegisterValue(int registerNumber, simpleBuffer spb){
+  
 }

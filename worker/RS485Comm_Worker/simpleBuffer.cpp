@@ -5,6 +5,7 @@
 simpleBuffer::simpleBuffer(char * p, int len) {
   _buf = p;
   _len = len;
+  _baseOffset = 0;
 }
 
 //
@@ -87,8 +88,18 @@ long simpleBuffer::getHexDigitsAt(int offset, int limit){
   
 }
 
+void simpleBuffer::resetBaseOffset()
+{
+   _baseOffset = 0;
+}
+
+void simpleBuffer::setBaseOffset(int offset){
+   _baseOffset = offset;
+}
+
+
 void simpleBuffer::setCharAt(int offset, char c){
-    if (offset < _len)  _buf[offset] = c;
+    if (( _baseOffset + offset) < _len)  _buf[ _baseOffset+offset] = c;
 }
 
 void simpleBuffer::setDigitAt(int offset, int v){
@@ -103,6 +114,10 @@ void simpleBuffer::setHexDigitAt(int offset, int v){
   setCharAt(offset, (v < 10 ? v + '0' : v - 10 + 'A'));
 }
 
+void simpleBuffer::setSignedHexDigitsAt(int offset, long v, int limit) {
+    setHexDigitsAt(offset, abs(v), limit);
+    setCharAt(offset, (v < 0 ? '-' : '+'));  
+}
 
 void simpleBuffer::setHexDigitsAt(int offset, long v, int limit){
     int j;

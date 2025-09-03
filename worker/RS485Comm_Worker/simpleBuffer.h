@@ -30,11 +30,15 @@ class simpleBuffer{
     void setHexDigitsAt(int offset, long v, int limit);
     void setHexDigitAt(int offset, int v);
     void setHexByteAt(int offset, int v);   
- 
-       
+    void setSignedHexDigitsAt(int offset, long v, int limit);
+
+    void resetBaseOffset();
+    void setBaseOffset(int offset);
+    
   protected:
     char * _buf;
     int _len;
+    int _baseOffset;
 };
 
 

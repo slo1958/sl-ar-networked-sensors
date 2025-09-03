@@ -5,7 +5,7 @@
 #include "SerialComm.h"
 #include "InputBufferLib2.h"
 #include "OutputBufferLib2.h"
-#include "DeviceAndNode.h"
+#include "CustomDeviceAndNode.h"
 
 #define SOFTWARE_VERSION "0.0.008"
 
@@ -50,7 +50,7 @@ OneWire oneWire(ONE_WIRE_BUS_IO);
 DallasTemperature sensors(&oneWire);
 DeviceAddress SensorAddress;
 
-nodeDefinition CurrentNode;
+customNodeDefinition currentNode;
 
 bool hasUserControl = false;
 
@@ -100,6 +100,8 @@ void setup(void) {
   if (hasUserControl) {
     userControlSerial.xbegin(9600);
   }
+
+  currentNode.configureCustomNode();
 
   sensors.begin();
 
@@ -182,7 +184,7 @@ void loop(void) {
  
   processControl(userControlInput, userControlOutput);
 
-  processCommand(CurrentNode, rsNetworkInput, rsNetworkOutput, hasUserControl);
+  processCommand(currentNode, rsNetworkInput, rsNetworkOutput, hasUserControl);
  
   if (lastError != 0) ledChangeDelay = LED_DELAY_ERROR;
   
