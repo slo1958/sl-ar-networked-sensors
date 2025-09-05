@@ -9,9 +9,9 @@
 //
 nodeDefinition::nodeDefinition(){
   _NodeAddr = EEPROM.read(EEPROMAddress_DeviceID);
-
-  // update nbr device in _baseDevice
-  _baseDevice.setLastDeviceID(getLastDeviceID());
+  _baseDevice.myNode = this;
+  
+ 
 }
 
 bool  nodeDefinition::validNodeAddress(int addr){
@@ -41,19 +41,23 @@ bool nodeDefinition::getFlashLedMode(){
 
 void nodeDefinition::getRegisterDescription(int deviceNumber, int registerNumber, simpleBuffer spb){
   deviceDefinition* temp = getDevice(deviceNumber);
+  if (temp == NULL) return ;
   temp->getRegisterDescription(registerNumber, spb);
-  ;
+  
 }
 
 
 void nodeDefinition::getRegisterValue(int deviceNumber, int registerNumber, simpleBuffer spb){
   deviceDefinition* temp = getDevice(deviceNumber);
+  if (temp == NULL) return ;
   temp->getRegisterValue(registerNumber, spb); 
+  
 }
 
     
 void nodeDefinition::setRegisterValue(int deviceNumber, int registerNumber, simpleBuffer spb){
   deviceDefinition* temp = getDevice(deviceNumber);
+  if (temp == NULL) return ;
   
 }
 
@@ -63,7 +67,7 @@ deviceDefinition* nodeDefinition::getDevice(int deviceNumber){
 }
 
 int nodeDefinition::getLastDeviceID(){
-  return 0;
+  return _lastDeviceID;
 }
 
 
@@ -233,10 +237,7 @@ nodeInfoDeviceDefinition::nodeInfoDeviceDefinition(){
 void nodeInfoDeviceDefinition::configureDevice(){
   
 }
-
-void nodeInfoDeviceDefinition::setLastDeviceID(int lastDeviceID){
-  _lastDeviceID = lastDeviceID;
-}
+ 
 
 void nodeInfoDeviceDefinition::setLastError(int lastError){
   _lastError = lastError;
@@ -275,20 +276,24 @@ void nodeInfoDeviceDefinition::getRegisterValue(int registerNumber, simpleBuffer
   switch (registerNumber) {
   // common registers
     case REGISTER_DEVICE_NAME:
+      storeRegisterValueInBuffer(registerNumber,myNode->nodeName, spb);
       break;
 
     case REGISTER_MODEL_ID:
+      storeRegisterValueInBuffer(registerNumber,myNode->nodeModel, spb);
       break;
       
     case REGISTER_DEVICE_BRAND:
+      storeRegisterValueInBuffer(registerNumber,myNode->nodeBrand, spb);
       break;
 
     case REGISTER_DEVICE_REGISTER_LAST_ID:
+      storeRegisterInt2ValueInBuffer( registerNumber, NODE_INFO_DEVICE_LAST_REGISTER, spb);
       break;
 
   // device specific registers
     case REGISTER_NODE_INFO_LAST_DEV_ID:
-        storeRegisterInt2ValueInBuffer( registerNumber, NODE_INFO_DEVICE_LAST_REGISTER,  spb);
+        storeRegisterInt2ValueInBuffer( registerNumber, myNode->getLastDeviceID(),  spb);
         break;
     
     case REGISTER_NODE_INFO_ERRORS:
@@ -310,5 +315,6 @@ void nodeInfoDeviceDefinition::getRegisterValue(int registerNumber, simpleBuffer
 
 
 void nodeInfoDeviceDefinition::setRegisterValue(int registerNumber, simpleBuffer spb){
+  return;
   
 }

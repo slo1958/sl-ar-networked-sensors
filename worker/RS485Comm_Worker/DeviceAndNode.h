@@ -38,6 +38,8 @@
 
 #define CUSTOM_DEVICE_START_ID 1
 
+class nodeDefinition;
+
 // ==== Generic device
 
 class deviceDefinition{
@@ -78,7 +80,6 @@ class deviceDefinition{
 class nodeInfoDeviceDefinition: public deviceDefinition {
   public:
     nodeInfoDeviceDefinition();
-    void setLastDeviceID(int lastDeviceID);
     void setLastError(int lastError);
     
     void configureDevice() override;
@@ -86,9 +87,10 @@ class nodeInfoDeviceDefinition: public deviceDefinition {
     
     void getRegisterValue(int registerNumber, simpleBuffer spb) override;
     void setRegisterValue(int registerNumber, simpleBuffer spb) override;
+
+    nodeDefinition* myNode;
     
   protected:
-    int _lastDeviceID;
     int _lastError;
 
 };
@@ -104,11 +106,11 @@ class nodeDefinition{
     bool validNodeAddress(int addr);
     void setNodeAddress(int addr);
     int getNodeAddr();
+    int getLastDeviceID();
     
     void setFlashLedMode(bool mode);
     bool getFlashLedMode();
 
-    virtual int getLastDeviceID();
     virtual deviceDefinition* getDevice(int deviceNumber);
     
     void getRegisterDescription(int deviceNumber, int registerNumber, simpleBuffer spb);
@@ -116,11 +118,17 @@ class nodeDefinition{
     void getRegisterValue(int deviceNumber, int registerNumber, simpleBuffer spb);
     void setRegisterValue(int deviceNumber, int registerNumber, simpleBuffer spb);  
 
+    //int lastDeviceID = 1;
+    char nodeName[16] = "TestNode";
+    char nodeModel[16] = "Dummy";
+    char nodeBrand[16] = "SLO";
+    
  protected:
     int _NodeAddr;
     int _FlashLedMode;
     nodeInfoDeviceDefinition _baseDevice;
+    int _lastDeviceID = 1;
 };
 
-
+ 
 #endif

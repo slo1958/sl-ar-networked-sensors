@@ -13,12 +13,19 @@
 #define CMD_RESTART_NODE 'Z'
 #define CMD_START_FLASH_LED 'F'
 #define CMD_STOP_FLASH_LED 'G'
+
 #define CMD_GET_REGISTER_DESCRIPTION 'D'
 #define CMD_GET_REGISTER_VALUE 'V'
 #define CMD_SET_REGISTER_VALUE 'W'
 
 #define ADDRESS_START 1
 #define CMD_START 5
+#define CMD_DEVICE_START 6
+#define CMD_REGISTER_START 8 
+
+#define CMD_PAYLOAD_START
+
+#define REPLY_ADDRESS_START 1
 #define REPLY_PAYLOAD_START 6
 
 #define CMD_OK 0
@@ -27,15 +34,15 @@
 void prepareReplyHeader(nodeDefinition node, outputBufferHandler outbuf){
   outbuf.clearBuffer();
   outbuf.setCharAt(0, 'R');
-  outbuf.setHexByteAt(1, node.getNodeAddr());
-  outbuf.setHexByteAt(3, 255 - node.getNodeAddr());
-  outbuf.setCharAt(5,':');
+  outbuf.setHexByteAt(REPLY_ADDRESS_START, node.getNodeAddr());
+  outbuf.setHexByteAt(REPLY_ADDRESS_START+2, 255 - node.getNodeAddr());
+  outbuf.setCharAt(REPLY_PAYLOAD_START-1,':');
   
 }
 
 void prepareReplyUpdateAddress(nodeDefinition node, outputBufferHandler outbuf, int oldAddress, int opStatus){
   prepareReplyHeader(node, outbuf);
-  outbuf.setCharAt(REPLY_PAYLOAD_START,'A');
+  outbuf.setCharAt(REPLY_PAYLOAD_START, TYPE_SETADDRESS);
   outbuf.setHexByteAt(REPLY_PAYLOAD_START + 1, oldAddress);
   outbuf.setHexByteAt(REPLY_PAYLOAD_START + 3, opStatus);  
   outbuf.setCharAt(REPLY_PAYLOAD_START + 5,END_BUFFER_MARK);
@@ -45,23 +52,22 @@ void prepareReplyUpdateAddress(nodeDefinition node, outputBufferHandler outbuf, 
 void prepareReplyUpdateLedMode(nodeDefinition node, outputBufferHandler outbuf){
   prepareReplyHeader(node, outbuf);
   if (node.getFlashLedMode()) {  
-    outbuf.setCharAt(REPLY_PAYLOAD_START,'F');
+    outbuf.setCharAt(REPLY_PAYLOAD_START, CMD_START_FLASH_LED);
   } else {
-     outbuf.setCharAt(REPLY_PAYLOAD_START,'G');   
+     outbuf.setCharAt(REPLY_PAYLOAD_START,CMD_STOP_FLASH_LED);   
   } 
   outbuf.setCharAt(REPLY_PAYLOAD_START + 1,END_BUFFER_MARK);
 }
 
-
-int extractCheckedAddress(inputBufferHandler inbuf) {
-  int startbyte;
+int extractCheckedByte(inputBufferHandler inbuf, int startByte) {
+  int tempIndex;
   
-  startbyte = ADDRESS_START;
-  int k1 = inbuf.getHexByteAt(startbyte);
+  tempIndex = startByte;
+  int k1 = inbuf.getHexByteAt(tempIndex);
   if (k1 < 0) return -1;
 
-  startbyte += 2;
-  int k2 = 255 - inbuf.getHexByteAt(startbyte);
+  tempIndex += 2;
+  int k2 = 255 - inbuf.getHexByteAt(tempIndex);
   if (k2 < 0) return -1;
 
   if (k1 != k2) return -1;
@@ -69,9 +75,24 @@ int extractCheckedAddress(inputBufferHandler inbuf) {
 }
 
 
+int extractCheckedAddress(inputBufferHandler inbuf) {
+  return extractCheckedByte(inbuf, ADDRESS_START);
+  
+}
+
+
 
 void requestDeviceRegisterDescription(nodeDefinition node, inputBufferHandler inbuf, outputBufferHandler outbuf, int deviceNumber, int registerNumber) {
-  
+
+    prepareReplyHeader(node, outbuf);
+    outbuf.setCharAt(REPLY_PAYLOAD_START,CMD_GET_REGISTER_DESCRIPTION);
+    outbuf.setHexByteAt(REPLY_PAYLOAD_START + 1, deviceNumber);
+    outbuf.setHexByteAt(REPLY_PAYLOAD_START + 3, registerNumber);  
+    outbuf.setCharAt(REPLY_PAYLOAD_START+5,':');
+    outbuf.setBaseOffset(REPLY_PAYLOAD_START+6);
+    node.getRegisterDescription(deviceNumber, registerNumber, outbuf);
+    outbuf.resetBaseOffset();
+    
 }
   
 
@@ -98,7 +119,7 @@ void restartNode(){
 }
 
 
-void processCommand(nodeDefinition node, inputBufferHandler inbuf, outputBufferHandler outbuf, bool allowSetAddres) {
+void processNetwork(nodeDefinition node, inputBufferHandler inbuf, outputBufferHandler outbuf, bool allowSetAddres) {
 
   inbuf.checkAnyMessage();
 
@@ -138,10 +159,9 @@ void processCommand(nodeDefinition node, inputBufferHandler inbuf, outputBufferH
     return;
   }
 
-  int deviceNumber = inbuf.getHexByteAt(CMD_START+1);
-  int registerNumber = inbuf.getHexByteAt(CMD_START+2);
+  int deviceNumber = extractCheckedByte(inbuf, CMD_DEVICE_START);
+  int registerNumber = extractCheckedByte(inbuf, CMD_REGISTER_START);
   
-
   if (cmd == CMD_GET_REGISTER_DESCRIPTION) { requestDeviceRegisterDescription(node, inbuf, outbuf, deviceNumber, registerNumber);inbuf.clearBuffer();return;}
 
   if (cmd == CMD_GET_REGISTER_VALUE)  { requestDeviceRegisterValue(node, inbuf, outbuf, deviceNumber, registerNumber);inbuf.clearBuffer();return;}

@@ -1,16 +1,14 @@
-#include <OneWire.h>
-#include <DallasTemperature.h>
+ 
 
 #include <SoftwareSerial.h>
 #include "SerialComm.h"
 #include "InputBufferLib2.h"
 #include "OutputBufferLib2.h"
-#include "CustomDeviceAndNode.h"
+#include "CustomNode.h"
 
 #define SOFTWARE_VERSION "0.0.008"
 
-// Data wire is connected to GPIO 4
-#define ONE_WIRE_BUS_IO 4
+
 
 #define BUTTON_IO 5
 
@@ -46,27 +44,22 @@
 
 #define KBUFFER_SIZE 32
 
-OneWire oneWire(ONE_WIRE_BUS_IO);
-DallasTemperature sensors(&oneWire);
-DeviceAddress SensorAddress;
-
+// Define our node
 customNodeDefinition currentNode;
 
 bool hasUserControl = false;
 
-
 bool ledStatus = HIGH;
+
 unsigned long ledLastChange;
 unsigned long ledChangeDelay;
 unsigned long pollLastRun = 0;
  
 byte lastError = 0;
 
-bool SensorParasitePower;
-bool SensorDeviceFound;
+
 bool AutoPollingMode = false;
 
-int SensorCount = 0;
 
 char commInBuffer[KBUFFER_SIZE];
 char commOutBuffer[KBUFFER_SIZE];
@@ -103,12 +96,7 @@ void setup(void) {
 
   currentNode.configureCustomNode();
 
-  sensors.begin();
-
-  SensorCount = sensors.getDeviceCount();
-
-  SensorParasitePower = sensors.isParasitePowerMode();
-  SensorDeviceFound = sensors.getAddress(SensorAddress, 0);
+ 
 
   rsNetworkInput.clearBuffer();
   rsNetworkOutput.clearBuffer();
@@ -123,13 +111,6 @@ void setup(void) {
 }
 
 
-
-float getTemperature() {
-  sensors.requestTemperatures();
-  delay(750);
-  float tempC = sensors.getTempCByIndex(0);
-  return tempC;
-}
 
 
 boolean debounce(int IOPin, boolean prev) {
@@ -182,9 +163,9 @@ void loop(void) {
   userControlInput.clearOldData(AUTO_CLEAR_BUFFER_DELAY);
   rsNetworkInput.clearOldData(AUTO_CLEAR_BUFFER_DELAY);
  
-  processControl(userControlInput, userControlOutput);
+  processLocal(currentNode, userControlInput, userControlOutput, hasUserControl);
 
-  processCommand(currentNode, rsNetworkInput, rsNetworkOutput, hasUserControl);
+  processNetwork(currentNode, rsNetworkInput, rsNetworkOutput, hasUserControl);
  
   if (lastError != 0) ledChangeDelay = LED_DELAY_ERROR;
   

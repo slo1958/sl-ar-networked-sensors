@@ -17,18 +17,18 @@ simpleBuffer::simpleBuffer(char * p, int len) {
 
 void simpleBuffer::moveChars(int offset, const char source[], int maxlen){
   int i;
-  for (i=0;(source[i] != 0 && i<maxlen); i++) _buf[offset+i] = source[i];
-  _buf[offset+i] = 0;  
+  for (i=0;(source[i] != 0 && i<maxlen); i++) _buf[_baseOffset+offset+i] = source[i];
+  _buf[_baseOffset+offset+i] = 0;  
 }
 
-void simpleBuffer::moveBytes(int offset, char source[], int movelen){
-  int i;
-    for (i=0;i < movelen; i++) _buf[offset+i] = source[i]; 
-}
+//void simpleBuffer::moveBytes(int offset, char source[], int movelen){
+//  int i;
+//    for (i=0;i < movelen; i++) _buf[_baseOffset+offset+i] = source[i]; 
+//}
 
 void simpleBuffer::replaceChar(char findChar, char replChar){
   int i;
-  for (i=0; i<_len; i++) if(_buf[i] == findChar) _buf[i] = replChar;
+  for (i=0; i<_len; i++) if(_buf[_baseOffset+i] == findChar) _buf[_baseOffset+i] = replChar;
   return;
 }
 

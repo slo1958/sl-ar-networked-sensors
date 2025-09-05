@@ -11,7 +11,7 @@ class simpleBuffer{
     simpleBuffer(char * p, int len);
         
     void moveChars(int offset, const char source[], int maxlen);
-    void moveBytes(int offset, char source[], int movelen);
+    // void moveBytes(int offset, char source[], int movelen);
 
     void replaceChar(char findChar, char replChar);
     

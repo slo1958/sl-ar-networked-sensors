@@ -1,4 +1,5 @@
-#include "customDeviceAndNode.h"
+
+#include "DeviceOneWireTemperature.h"
 
 //
 // Define the temperature measure peripheral
@@ -10,11 +11,21 @@
 
 #define MY_DEVICE_LAST_REGISTER MY_DEVICE_REGISTER_PARASITE_MODE
 
-tempMeasureDevice::tempMeasureDevice(){
+
+OneWireTemperatureDevice::OneWireTemperatureDevice(){
   
 }
 
-void tempMeasureDevice::getRegisterDescription(int registerNumber, simpleBuffer spb){
+
+
+float OneWireTemperatureDevice::getTemperature() {
+  sensors.requestTemperatures();
+  delay(750);
+  float tempC = sensors.getTempCByIndex(0);
+  return tempC;
+}
+
+void OneWireTemperatureDevice::getRegisterDescription(int registerNumber, simpleBuffer spb){
     // Keep this statement to handle standard registers
     if (registerNumber < CUSTOM_REGISTER_START_NUMBER) { deviceDefinition::getRegisterDescription(registerNumber, spb); return; }
 
@@ -33,7 +44,7 @@ void tempMeasureDevice::getRegisterDescription(int registerNumber, simpleBuffer 
     return;
 }
 
-void tempMeasureDevice::getRegisterValue(int registerNumber, simpleBuffer spb) {
+void OneWireTemperatureDevice::getRegisterValue(int registerNumber, simpleBuffer spb) {
   float temperature;
   long int_temp = 251234; //temperature *1000;
   
@@ -74,35 +85,3 @@ void tempMeasureDevice::getRegisterValue(int registerNumber, simpleBuffer spb) {
   return;
 }
   
-//
-// Custom node
-//
-// Building the node
-//
-
-customNodeDefinition::customNodeDefinition(){
-  // Init the parent node
-  nodeDefinition();
-
-  // Add code to init the node
-  
-}
-void customNodeDefinition::configureCustomNode(){
-
-  nodeDefinition::configureCommonNode();
-}
-
-deviceDefinition* customNodeDefinition::getDevice(int deviceNumber){
-  switch (deviceNumber) {
-    case MYDEVICE_1:
-      return &myDevice1;
-    case MYDEVICE_2:
-      return &myDevice2;
-    default:
-       return nodeDefinition::getDevice(deviceNumber);
-  } 
-}
-
-int customNodeDefinition::getLastDeviceID(){
-  return LAST_DEVICE_ID;
-}
